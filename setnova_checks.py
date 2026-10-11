@@ -214,7 +214,7 @@ ADVICE_RE = [r"\bextend(s|ed|ing)? duration", r"\bshorten(s|ed|ing)? duration", 
              r"\bshould (buy|sell)\b", r"\bconsider (buying|selling)\b"]
 EXPECT = ["market pricing", "markets price", "priced in", "priced earlier", "pricing leans", "leans toward", "markets expect", "odds of", "probability of a"]
 PRODUCER = ["not retrieved", "pinned", "cross-foot to the ALCO pack", "in the object", "summary at foot", "single obs",
-            "file and PDF editions", "shown in the file", "PDF edition", "full labels", "per-class", "(verified)", "(carryover)"]
+            "file and PDF editions", "shown in the file", "PDF edition", "full labels", "per-class", "(verified)", "(carryover)", "Full sources in the footer"]
 OFFER = ["Daily Desk Read", "available on request", "working session", "deep-dive", "deep dive", "Ways to Work", "How Setnova Helps", "every morning"]
 KPI_FULL = ["7 consecutive quarterly increases", "beta 34% vs 45% modeled", "up $4.6M over three months, less negative",
             "$1,910M / $2,245M", "37.0% of assets", "1.7\u00d7 covered", "vs 8.5% internal floor", "watch \u221213.75% / limit \u221225%"]
@@ -338,10 +338,8 @@ def chk_periods(ed, mc, today):
 def chk_item_dates(ed, mc, today):
     out = []
     for k, t in ed.html_texts().items():
-        for m in re.finditer(r"(?<!\d\s)(?<!\d,\s)\b(" + MONTH_RX + r")\s+20\d\d\b", t):
-            before = t[max(0, m.start() - 4):m.start()]
-            if not re.search(r"\d\s*$", before) and not re.search(r"(Q[1-4]|quarter|retrieved)\s*$", t[max(0, m.start() - 12):m.start()], re.I):
-                out.append(f"[{k}] month-only date chip '{m.group(0)}': {ctx(t, m.start(), m.end())}")
+        for m in re.finditer(r"(?:^|\n)[ \t\u2022\-]*(" + MONTH_RX + r")\s+20\d\d\b(?!\s*(?:CPI|PCE|payrolls|data|release|report|figures\b(?! rose)))", t):
+            out.append(f"[{k}] month-only date chip '{m.group(0).strip()}': {ctx(t, m.start(), m.end())}")
     if mc is None:
         return out
     for it in mc.items:
@@ -370,15 +368,20 @@ def _num_tokens(t):
 def chk_text_vs_html(ed, mc, today):
     if "text" not in ed.vis or not ed.html_texts():
         return None
-    html_all = norm(" ".join(ed.html_texts().values())).replace(" ", "")
+    html_sp = norm(" ".join(ed.html_texts().values()))
+    html_all = html_sp.replace(" ", "")
     out, toks = [], _num_tokens(norm(ed.vis["text"]))
     for tok in toks:
-        if tok.replace(" ", "") not in html_all:
+        if tok.replace(" ", "") in html_all:
+            continue
+        if tok.endswith("%") and re.search(r"(?<![\d.])" + re.escape(tok[:-1]) + r"(?![\d.])", html_sp):
+            continue  # ladder cell printed without "%" (8 Oct email layout)
+        else:
             out.append(f"plain-text figure '{tok}' not in the HTML")
     for ten in ("3M", "6M", "1Y", "2Y", "5Y", "10Y", "30Y"):
         if mc and mc.curve.get(ten) is not None:
-            v = f"{mc.curve[ten]:.2f}%"
-            if v not in norm(ed.vis["text"]):
+            v = f"{mc.curve[ten]:.2f}"
+            if not re.search(r"\b" + ten + r"\b[^\d\n|]{0,6}" + re.escape(v) + r"(?!\d)", norm(ed.vis["text"])):
                 out.append(f"plain text lacks curve tenor {ten} {v}")
     ed.token_count = (len(toks), len(out))
     return out
@@ -410,7 +413,7 @@ def chk_producer(ed, mc, today):
 
 def chk_offer(ed, mc, today):
     out = []
-    tenor = re.compile(r"\b(?:\d{1,2}|two|three|five|seven|ten|thirty)-(?:year|yr)\b(?!\s+mortgage)|\b(?:2|3|5|7|10|20|30)Y\b", re.I)
+    tenor = re.compile(r"(?<![\d.])\b(?:\d{1,2}|two|three|five|seven|ten|thirty)-(?:year|yr)\b(?!\s+(?:mortgage|fixed|(?:effective\s+)?duration|CD|APY))|\b(?:2|3|5|7|10|20|30)Y\b", re.I)
     book = re.compile(r"book yield|roll-?off|rolling off|tranche|cash flow (?:due|next)|maturing cash", re.I)
     for k, t in ed.vis.items():
         out += [f"[{k}] {h}" for h in find_all(t, OFFER)]
@@ -455,13 +458,13 @@ def chk_change_basis(ed, mc, today):
                 if inst is None:
                     out.append(f"[{k}] change with no instrument: '{s[:140]}'")
                     continue
-                claims.append((k, inst, base, float(m.group(1)), post, s, bool(wk_at and wk_at.start() < m.start())))
+                claims.append((k, inst, base, float(m.group(1)), post, s, bool(wk_at and wk_at.start() < m.start()), pre))
     if not claims:
         return []
     if mc is None or not mc.hist:
         return [f"{len(claims)} change claim(s) but marketclose.json carries no curve history to compute them from"] + out
     to = mc.close
-    for k, inst, base, n, post, s, after_week in claims:
+    for k, inst, base, n, post, s, after_week, pre in claims:
         if base[0] == "week":
             frm = mc.back(5)
         elif base[0] == "day":
@@ -476,7 +479,12 @@ def chk_change_basis(ed, mc, today):
             out.append(f"[{k}] cannot compute {inst} {frm}->{to} from the history: '{s[:120]}'")
             continue
         exp = round((b - a) * 100)
-        sign = -1 if re.match(r"\s*(lower|down|below|flatter|richer)", post, re.I) else (1 if re.match(r"\s*(higher|up|above|steeper|cheaper)", post, re.I) else (1 if n > 0 else 0))
+        if re.match(r"\s*(lower|down|below|flatter|richer)", post, re.I) or re.search(r"\b(down|fell|lost|dropped|declined|eased|slipped)\s+(?:about\s+|roughly\s+|some\s+)?$", pre, re.I) or n < 0:
+            sign = -1
+        elif re.match(r"\s*(higher|up|above|steeper|cheaper)", post, re.I) or re.search(r"\b(up|rose|gained|added|climbed|rallied\s+up)\s+(?:about\s+|roughly\s+|some\s+)?$", pre, re.I) or n > 0:
+            sign = 1
+        else:
+            sign = 0
         got = abs(n) * (sign or 1)
         okv = abs(abs(n) - abs(exp)) < 0.51 and (sign == 0 or exp == 0 or (exp > 0) == (sign > 0))
         line = f"{inst} {frm}->{to}: printed {'+' if got > 0 else ''}{got:g} bp, Treasury {exp:+d} bp"
@@ -497,7 +505,7 @@ def chk_prose_grid(ed, mc, today):
             for m in re.finditer(r"(?:" + rx + r")(?![^.;\n]{0,12}(?:mortgage|fixed|FRM|ARM))[^%.;\n]{0,28}?\b(at|to|of|near|through|above|below|over|under)\s+(\d+(?:\.\d+)?)%", tt, re.I):
                 v, op, x = mc.curve.get(nm), m.group(1).lower(), float(m.group(2))
                 sent = tt[max(0, tt.rfind(".", 0, m.start())):tt.find(".", m.end()) if tt.find(".", m.end()) > 0 else len(tt)]
-                if v is None or re.search(r"mortgage|PMMS|Freddie|fixed-rate loan", sent, re.I):
+                if v is None or re.search(r"mortgage|PMMS|Freddie|fixed-rate loan", sent, re.I) or re.search(r"\b(CD|APY|HYSA|savings|money[- ]market|deposit rate)\b", tt[m.start():m.end() + 4], re.I):
                     continue
                 bad = ((op in ("at", "to", "of") and abs(v - x) > 0.005 and "." in m.group(2)) or
                        (op in ("through", "above", "over") and not v > x) or (op in ("below", "under") and not v < x) or
@@ -513,7 +521,9 @@ def chk_prose_grid(ed, mc, today):
             nm = (m.group(1) or m.group(4)).replace("-", "")
             n = int(m.group(2) or m.group(3))
             pre = tt[max(0, m.start() - 25):m.start()]
-            if re.search(r"\b(up|down|steeper|flatter|by|since)\s*$", pre, re.I) or re.match(r"\s*(steeper|flatter|since|higher|lower)", tt[m.end():m.end() + 12], re.I):
+            if re.search(r"\b(up|down|steeper|flatter|by|since)\s*$", pre, re.I) or re.match(r"\s*(steeper|flatter|since|higher|lower)", tt[m.end():m.end() + 12], re.I) \
+                    or re.search(r"(steepen|flatten|widen|narrow|invert)\w*\s+(?:by\s+)?\d+\s?bp\s*$", tt[max(0, m.start() - 40):m.start()], re.I) \
+                    or re.match(r"\s*(steeper|flatter|wider|narrower)", tt[m.end():m.end() + 14], re.I):
                 continue
             v = mc.value(nm if nm != "3M10Y" else "3M10Y", mc.close) if mc.close else None
             if v is None and nm == "2s10s" and mc.curve.get("10Y") is not None and mc.curve.get("2Y") is not None:
@@ -528,8 +538,9 @@ def chk_qbp_basis(ed, mc, today):
     out = []
     for k, t in ed.vis.items():
         for s in sentences(t):
-            if re.search(r"FDIC|Quarterly Banking Profile|\bQBP\b", s) and re.search(r"\b(up|down|rose|fell|increased|decreased|declined|gain|\+\d)", s, re.I) \
-                    and re.search(r"\d", s) and not re.search(r"from the prior quarter|from a year ago|from the previous quarter|quarter over quarter|from Q[1-4]|year over year|from the first quarter|from the second quarter", s, re.I):
+            if re.search(r"Quarterly Banking Profile|\bQBP\b|FDIC'?s? Q[1-4]|FDIC[^.]{0,60}\b(industry|net interest margin|NIM|net income|domestic deposits|noncurrent|unrealized losses)", s, re.I) \
+                    and re.search(r"\b(up|down|rose|fell|increased|decreased|declined|gain(?:ed)?)\b[^.]{0,30}?\d+(?:\.\d+)?\s?(?:%|bp|basis point|percent|billion|million)", s, re.I) \
+                    and not re.search(r"\b(proposed|proposal|final rule|comment period|assessment rate|issued|approved)\b", s, re.I) and not re.search(r"from the prior quarter|from a year ago|from the previous quarter|quarter over quarter|from Q[1-4]|year over year|from the first quarter|from the second quarter", s, re.I):
                 out.append(f"[{k}] QBP change without its comparison basis: '{s[:160]}'")
     return out
 
@@ -582,9 +593,9 @@ def chk_g8(eds, mc):
                 v = mc.curve.get(ten)
                 if v is None:
                     out.append(f"marketclose.json has no {ten}")
-                elif f"{v:.2f}%" not in t:
+                elif f"{v:.2f}%" not in t and not re.search(r"(?<![\d.])" + re.escape(f"{v:.2f}") + r"(?![\d.%])(?!\s*bp)", t):
                     out.append(f"[{ed.name}/{k}] curve {ten} {v:.2f}% not printed")
-            for lab, rx in (("EFFR", r"EFFR|effective (?:federal )?funds rate"), ("SOFR", r"\bSOFR\b(?! 30)"), ("IORB", r"\bIORB\b")):
+            for lab, rx in (("EFFR", r"EFFR|effective (?:federal )?funds rate"), ("SOFR", r"(?<!average )(?<!avg )(?<!day )\bSOFR\b(?! 30)(?!\s+(?:average|avg))"), ("IORB", r"\bIORB\b")):
                 if lab in mc.rates:
                     for m in re.finditer(r"(?:" + rx + r")[^%\n]{0,25}?(\d+\.\d\d)%", t, re.I):
                         if abs(float(m.group(1)) - mc.rates[lab]) > 0.005:
@@ -651,11 +662,13 @@ CMN = ("<p>Friday, October 9, 2026 \u00b7 Market data as of Oct 8 close \u00b7 F
        "<p>3M 4.23% \u00b7 6M 4.30% \u00b7 1Y 4.44% \u00b7 2Y 4.75% \u00b7 5Y 4.99% \u00b7 10Y 5.22% \u00b7 30Y 5.60% \u00b7 2s10s +47 bp \u00b7 3M\u201310Y +99 bp \u00b7 5s30s +61 bp</p>"
        "<p>EFFR 3.88% \u00b7 SOFR 3.88% \u00b7 IORB 3.90%</p>"
        "<p>The long end rallied on the day (the 10-year 6 bp below October 7, the 30-year 7 bp lower at 5.60%) and the curve was little changed on the week. "
-       "Freddie Mac's survey put the 30-year fixed at 7.40% and the 15-year at 6.73%, both up from the prior week (7.28% / 6.60%).</p>")
+       "Freddie Mac's survey put the 30-year fixed at 7.40% and the 15-year at 6.73%, both up from the prior week (7.28% / 6.60%).</p>"
+       "<p>The 30-year fell 7 bp from October 7. The 2s10s slope steepened 15 bp to +41 bp since September 30. The top 1-year CD APY on Bankrate's list was 4.45%. "
+       "The FDIC increased its staffing for bank examinations. WED 14: Personal Income &amp; Outlays, August 2026 \u00b7 8:30 ET.</p>")
 FULL_BODY = ("<p>NIM 3.32% (7 consecutive quarterly increases) \u00b7 Cost of deposits 1.92% (beta 34% vs 45% modeled) \u00b7 AOCI \u2212$41.4M (up $4.6M over three months, less negative) \u00b7 "
              "Loans / deposits 85.1% ($1,910M / $2,245M) \u00b7 Avail. liquidity $1,017M (37.0% of assets) \u00b7 Uninsured 27% (1.7\u00d7 covered) \u00b7 Tier 1 leverage ratio 9.6% (vs 8.5% internal floor) \u00b7 EVE +300 \u221214.6% (watch \u221213.75% / limit \u221225%)</p>"
              "<p>Each 25 bp between that book yield and whatever it earns next is on the order of $313k a year, gross, full-year, full deployment ($125M \u00d7 0.25%). "
-             "AOCI sensitivity \u2248 $4.3M per 25 bp, taken at the whole securities portfolio\u2019s 4.2-year effective duration (the book states no AFS-only duration).</p>")
+             "AOCI sensitivity \u2248 $4.3M per 25 bp, taken at the whole securities portfolio\u2019s 4.2-year effective duration (the book states no AFS-only duration). The roughly $125M of cash flow is measured at the book's 4.2-year effective duration.</p>")
 FOOT = "<p>Sources: Federal Reserve H.15 &amp; FOMC; NY Fed/FRED; U.S. Treasury; BLS; BEA; FDIC QBP (retrieved Oct 9, 2026).</p>"
 
 
@@ -700,6 +713,8 @@ SEEDS = [
     ("9f", "full", "file_html", "vs 8.5% internal floor", "a leverage ratio", "tautological KPI caption"),
     ("9g", "generic", "email_html", "</p><p>EFFR", " Curve chart is shown in the file and PDF editions.</p><p>EFFR", "29 Sep: producer-facing note"),
     ("9g", "full", "text", "Sources:", "FHLB omitted, not retrieved this close. Sources:", "28 Sep: note to the producer"),
+    ("9g", "generic", "email_html", "</p><p>EFFR", " Full sources in the footer line.</p><p>EFFR", "1/5 Oct: producer note in the body"),
+    ("9a", "generic", "text", "The 30-year fell 7 bp from October 7.", "The 30-year rose 7 bp from October 7.", "direction word before the number"),
     ("9h", "generic", "file_html", "Sources:", "Full PDF edition available on request. Sources:", "28/29 Sep: unconfirmed offer"),
     ("9h", "full", "email_html", "Each 25 bp between that book yield", "Against the 2.95% book yield and the 5.06% 5-year par level, each 25 bp between that book yield", "29 Sep: named tenor against the book"),
     ("G1", "generic", "text", "the 10-year at 5.22%", "the 10-year at 5.31%", "24 Sep: prose level not the grid's"),
@@ -736,6 +751,21 @@ def self_test():
         hit = [r for r in rs if r["check"] == cid and r["status"] == "FAIL"]
         print(f"  {'caught' if hit else 'MISSED'}  {cid:5} {why}")
         ok &= bool(hit)
+    # Regression (8 Oct 2026): email-only editions whose HTML ladder prints bare numbers, plus a 30-day SOFR average.
+    lad = "<table><tr>" + "".join(f"<td>{t}</td>" for t in ("3M", "6M", "1Y", "2Y", "5Y", "10Y", "30Y")) + "</tr><tr>" + \
+          "".join(f"<td>{v}</td>" for v in ("4.23", "4.30", "4.44", "4.75", "4.99", "5.22", "5.60")) + "</tr></table>"
+    old_lad = CMN[CMN.index("<p>3M 4.23%"):CMN.index("</p>", CMN.index("<p>3M 4.23%")) + 4]
+    body = CMN.replace(old_lad, lad + "<p>2s10s +47 bp \u00b7 3M\u201310Y +99 bp \u00b7 5s30s +61 bp</p>").replace(
+        "IORB 3.90%</p>", "IORB 3.90%; 30-day average SOFR 3.79%.</p>")
+    reg = [Ed("full", email_html=_email(body + FULL_BODY, "FULL DESK READ"), text=_text(CMN + FULL_BODY)),
+           Ed("generic", email_html=_email(body, "DESK READ"), text=_text(CMN))]
+    bad = [r for r in run(reg, mc, "2026-10-09") if r["status"] == "FAIL"]
+    if bad:
+        ok = False
+        print("REGRESSION 8 Oct ladder/SOFR-average FAILED:")
+        print(report(bad, [])[0])
+    else:
+        print("  regression 8 Oct ladder without % and 30-day SOFR average: no false positives")
     print("SELF-TEST", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 
