@@ -19,6 +19,8 @@ jobs:
           python-version: "3.12"
       - name: Self-test and regression corpus
         run: python3 run_corpus.py
+      - name: Decision-list self-test (weekly audit, PM DECISION LIST)
+        run: python3 decision_list.py --self-test
       - name: Tape checker compiles
         run: python3 -m py_compile brief_tape_check.py
       - name: Record hashes (compare with the pins in prompts/ and the task prompts)

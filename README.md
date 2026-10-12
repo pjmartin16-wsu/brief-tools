@@ -33,3 +33,9 @@ Add each new sent edition (or any edition that exposed a false positive or a mis
 the checker run on the drafts before anything is rendered. A scheduled task loads one of them by commit and SHA-256,
 so a change here takes effect only when the task's pin moves. Recipient addresses are supplied by the task prompt and
 are never stored in this public repo.
+
+## decision_list.py (added 12 Oct 2026)
+
+The mechanical half of the weekly audit's "PM DECISION LIST": the OPEN and ANSWERED rows of `00_Context/DECISIONS.md`,
+and the `_LOG.md` lines from the last 8 days that ask something of PM. The audit only matches those lines to rows by meaning.
+It closes the one POLICY BREACH in the 10 Oct rule prune (a rule added with no test). `python3 decision_list.py --self-test`.
