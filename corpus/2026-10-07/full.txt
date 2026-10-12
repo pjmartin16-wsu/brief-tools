@@ -1,0 +1,69 @@
+TREASURY FULL DESK READ
+Wednesday, October 7, 2026  |  Market data as of Oct 6 close  |  Fed funds 3.75-4.00% (set Sep 16)
+Setnova Advisory - Treasury & ALM
+
+THE READ
+The September jobs report came in soft - nonfarm payrolls rose +29,000 and the unemployment rate ticked to 4.2% - while inflation held above target: August headline CPI 3.4% and core CPI 2.4%, with August headline PCE 3.4% and core PCE 3.0%. Against that mix the FOMC raised the target range a quarter point to 3.75-4.00% at its September 16 meeting, a unanimous decision, and the September projections put the published year-end 2026 federal-funds median at 4.1% (central tendency 4.1-4.4%).
+
+The long end is doing work of its own. Tuesday's par curve has the 10-year at 5.27% and the 30-year at 5.64%, with the 5-year at 5.03% - the belly and long end above 5% while the effective funds rate is 3.88%. Yields eased 2-5 basis points across the curve on the day, leaving 2s10s at +48 bp, one basis point steeper than Monday. The 2-year at 4.79% stands about 91 bp above the 3.88% effective funds rate.
+
+For this balance sheet the two forces pull in opposite directions and both belong in the next ALCO run. New-money and reinvestment yields across the belly and long end are above 5%, well above a 2.95% securities book yield; at the same time long yields above 5% hold the market value of fixed-rate AFS securities down, which is where AOCI and the EVE profile register it. Deposit competition has not relaxed - the top of Bankrate's one-year CD list is 4.75% and its top high-yield savings rate 4.27%, advertised consumer yields that frame where renewal betas get tested.
+
+RATES (Oct 6 close; Oct 5 policy rates)
+Fed funds target 3.75-4.00% | Effective funds 3.88% | SOFR 3.89% | IORB 3.90% | Discount window 4.00%
+2-year 4.79% | 5-year 5.03% | 10-year 5.27% | 30-year 5.64% | 30Y mortgage 7.28%
+
+CURVE LADDER (Oct 6 close)
+3M 4.21% | 6M 4.28% | 1Y 4.46% | 2Y 4.79% | 5Y 5.03% | 10Y 5.27% | 30Y 5.64%
+Slopes: 2s10s +48 bp | 3M-10Y +106 bp | 5s30s +61 bp
+
+MACRO PRINTS
+August headline CPI 3.4% - core CPI 2.4% - August headline PCE 3.4% - core PCE 3.0%.
+September payrolls +29,000, September unemployment 4.2%, September average hourly earnings +3.0% y/y.
+Q2 2026 GDP +2.2% (third estimate). Sep SEP year-end 2026 federal-funds median 4.1% (central tendency 4.1-4.4%).
+
+MARKETS
+Broad dollar index: 121.38 (Oct 2)
+EUR / USD: 1.1259 (Oct 2)
+USD / JPY: 157.81 (Oct 2)
+WTI (Cushing) spot: $96.16 (Sep 29)
+Brent spot: $113.96 (Sep 29)
+
+YOUR BALANCE SHEET THIS MORNING (illustrative ~$2.75B community bank; book figures dated 30 Jun - 22 Aug 2026)
+NIM: 3.32% (7 consecutive quarterly increases)
+Cost of deposits: 1.92% (beta 34% vs 45% modeled)
+AOCI: -$41.4M (up $4.6M over three months, less negative)
+Loans / deposits: 85.1% ($1,910M / $2,245M)
+Avail. liquidity: $1,017M (37.0% of assets)
+Uninsured: 27% (1.7x covered)
+Tier 1 leverage ratio: 9.6% (vs 8.5% internal floor)
+EVE +300: -14.6% (watch -13.75% / limit -25%)
+
+TODAY'S TIE-IN
+- About $125M of securities cash flow comes due over the next twelve months against a 2.95% book yield. Each 25 bp between that book yield and whatever it earns next is on the order of $313k a year, gross, full-year, full deployment. No tenor named.
+- The $155M Q3 tranche at ~4.35% reprices against the sample bank's own 4.00-4.10% renewal defense band; renewing 25-35 bp below the tranche rate is ~$0.4-0.5M a year on that tranche.
+- AOCI sits at -$41.4M, up $4.6M over three months. Taken at the whole securities portfolio's 4.2-year effective duration (the book states no AFS-only duration), roughly $4.3M of AOCI moves per 25 bp on the $410M AFS book; long yields above 5% keep that mark depressed and it registers in the next EVE and AOCI run.
+- The +300 EVE position is -14.6%, beyond the internal -13.75% watch trigger but within the -25% policy limit - a number to carry into the next ALCO review as yields hold above 5% across the belly and long end.
+
+DEPOSIT COMPETITION (Bankrate top APYs, retrieved Oct 7; advertised consumer yields)
+Top 1-year CD: 4.75% (E*TRADE by Morgan Stanley)
+Top high-yield savings: 4.27% (Peak Bank)
+Discount window (primary credit) 4.00%. FHLB advance and brokered CD rates are not shown: neither has a published primary-source quote for Oct 6's close.
+
+BANKING NEWS
+Oct 7 [Federal Reserve] Minutes of the Sep 15-16 FOMC meeting released (2:00 pm ET).
+Sep 29 [Federal Reserve] Resolution-plan feedback letters published for 15 banking organizations.
+Oct 5 [Federal Reserve] Approved Isabella Bank Corporation's banking-organization structure-change application.
+Oct 2 [Federal Reserve] Approved Fleur Capital Corporation's structure-change application.
+
+REGULATORY WATCH
+Sep 30 [Federal Reserve] final: Final modifications to stress-test procedures - transparency and reduced capital-requirement volatility.
+Oct 2 [Federal Reserve] proposal: Regulation O (credit to bank insiders) modernization: comment period extended.
+Oct 2 [Federal Reserve] enforcement: Enforcement action issued against Ontario Bancorporation, Inc.
+Sep 22 [FDIC] proposed rule: State Bank Parity proposed rule (Federal Register).
+Sep 22 [FDIC & OCC] rule: Unsafe or Unsound Practices; Matters Requiring Attention; Correction (Federal Register).
+
+Setnova Advisory provides measurement-led treasury and ALM support for community banks and credit unions.
+Illustrative figures describe a hypothetical ~$2.75B community bank; not any client's data. Not investment advice.
+Sources: Federal Reserve H.15 & FOMC; NY Fed/FRED; U.S. Treasury; BLS; BEA; Freddie Mac PMMS; FDIC QBP; Bankrate (retrieved Oct 7, 2026)
+(c) 2026 Setnova Advisory - Treasury & ALM

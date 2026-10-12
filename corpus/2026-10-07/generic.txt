@@ -1,0 +1,58 @@
+TREASURY MORNING BRIEF
+Wednesday, October 7, 2026  |  Market data as of Oct 6 close  |  Fed funds 3.75-4.00% (set Sep 16)
+Setnova Advisory - Treasury & ALM
+
+THE READ
+The September jobs report came in soft - nonfarm payrolls rose +29,000 and the unemployment rate ticked to 4.2% - while inflation held above target: August headline CPI 3.4% and core CPI 2.4%, with August headline PCE 3.4% and core PCE 3.0%. Against that mix the FOMC raised the target range a quarter point to 3.75-4.00% at its September 16 meeting, a unanimous decision, and the September projections put the published year-end 2026 federal-funds median at 4.1% (central tendency 4.1-4.4%).
+
+The long end is doing work of its own. Tuesday's par curve has the 10-year at 5.27% and the 30-year at 5.64%, with the 5-year at 5.03% - the belly and long end above 5% while the effective funds rate is 3.88%. Yields eased 2-5 basis points across the curve on the day, leaving 2s10s at +48 bp, one basis point steeper than Monday. The 2-year at 4.79% stands about 91 bp above the 3.88% effective funds rate.
+
+For a deposit-funded balance sheet the two forces pull in opposite directions and both belong in the next ALCO run. New-money and reinvestment yields across the belly and long end are above 5%, while the market value of fixed-rate AFS securities sits lower as long yields hold above 5% - higher new-money yields and lower AFS marks show up in the same EVE and AOCI run. Deposit competition has not relaxed: the top of Bankrate's one-year CD list is 4.75% and its top high-yield savings rate 4.27%, the frame against which renewal betas are tested.
+
+RATES (Oct 6 close; Oct 5 policy rates)
+Fed funds target 3.75-4.00% | Effective funds 3.88% | SOFR 3.89% | IORB 3.90% | Discount window 4.00%
+2-year 4.79% | 5-year 5.03% | 10-year 5.27% | 30-year 5.64% | 30Y mortgage 7.28%
+
+CURVE LADDER (Oct 6 close)
+3M 4.21% | 6M 4.28% | 1Y 4.46% | 2Y 4.79% | 5Y 5.03% | 10Y 5.27% | 30Y 5.64%
+Slopes: 2s10s +48 bp | 3M-10Y +106 bp | 5s30s +61 bp
+
+MACRO PRINTS
+August headline CPI 3.4% - core CPI 2.4% - August headline PCE 3.4% - core PCE 3.0%.
+September payrolls +29,000, September unemployment 4.2%, September average hourly earnings +3.0% y/y.
+Q2 2026 GDP +2.2% (third estimate). Sep SEP year-end 2026 federal-funds median 4.1% (central tendency 4.1-4.4%).
+
+MARKETS
+Broad dollar index: 121.38 (Oct 2)
+EUR / USD: 1.1259 (Oct 2)
+USD / JPY: 157.81 (Oct 2)
+WTI (Cushing) spot: $96.16 (Sep 29)
+Brent spot: $113.96 (Sep 29)
+
+WHAT IT MEANS FOR YOUR BALANCE SHEET
+Deposits: Renewal betas are being tested against a 4.75% top one-year CD APY and a 4.27% top high-yield savings APY on Bankrate's lists - advertised consumer yields, not a cost of funds, but the competitive frame renewal pricing is modeled against. Measure the gap between maturing CD rates and today's offered renewal rates, and what each basis point of beta does to the cost of deposits.
+Investments: New-money and reinvestment yields across the belly and long end are above 5% while fixed-rate AFS market values sit lower as long yields hold above 5%: both show up in the next EVE and AOCI run. Measure reinvestment pickup against the existing book yield and the AOCI sensitivity per 25 bp of rate move.
+IRR / ALCO: With the curve positively sloped (2s10s +48 bp) and the front end near a 3.88% effective funds rate, re-run NII and EVE at current levels and check NEV and 5300/call-report IRR measures against policy limits - the +300 scenario is where fixed-rate duration shows up most.
+
+DEPOSIT COMPETITION (Bankrate top APYs, retrieved Oct 7; advertised consumer yields)
+Top 1-year CD: 4.75% (E*TRADE by Morgan Stanley)
+Top high-yield savings: 4.27% (Peak Bank)
+Discount window (primary credit) 4.00%. FHLB advance and brokered CD rates are not shown: neither has a published primary-source quote for Oct 6's close.
+
+BANKING NEWS
+Oct 7 [Federal Reserve] Minutes of the Sep 15-16 FOMC meeting released (2:00 pm ET).
+Sep 29 [Federal Reserve] Resolution-plan feedback letters published for 15 banking organizations.
+Oct 5 [Federal Reserve] Approved Isabella Bank Corporation's banking-organization structure-change application.
+Oct 2 [Federal Reserve] Approved Fleur Capital Corporation's structure-change application.
+
+REGULATORY WATCH
+Sep 30 [Federal Reserve] final: Final modifications to stress-test procedures - transparency and reduced capital-requirement volatility.
+Oct 2 [Federal Reserve] proposal: Regulation O (credit to bank insiders) modernization: comment period extended.
+Oct 2 [Federal Reserve] enforcement: Enforcement action issued against Ontario Bancorporation, Inc.
+Sep 22 [FDIC] proposed rule: State Bank Parity proposed rule (Federal Register).
+Sep 22 [FDIC & OCC] rule: Unsafe or Unsound Practices; Matters Requiring Attention; Correction (Federal Register).
+
+Setnova Advisory provides measurement-led treasury and ALM support for community banks and credit unions.
+Generic - not tied to any institution; not investment advice.
+Sources: Federal Reserve H.15 & FOMC; NY Fed/FRED; U.S. Treasury; BLS; BEA; Freddie Mac PMMS; FDIC QBP; Bankrate (retrieved Oct 7, 2026)
+(c) 2026 Setnova Advisory - Treasury & ALM

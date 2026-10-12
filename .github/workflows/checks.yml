@@ -1,0 +1,25 @@
+name: checks
+# Runs on every push and pull request: the checker's self-test (seeded historic errors must FAIL,
+# the clean fixture must PASS) and the regression corpus (every archived sent edition must give
+# exactly its expected result). A red run means the pin in the brief prompt must not move to this commit.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Self-test and regression corpus
+        run: python3 run_corpus.py
+      - name: Tape checker compiles
+        run: python3 -m py_compile brief_tape_check.py
+      - name: Record hashes (compare with the pins in prompts/ and the task prompts)
+        run: sha256sum setnova_checks.py brief_tape_check.py prompts/*.md

@@ -1,0 +1,21 @@
+SETNOVA TREASURY FULL DESK READ — Thursday, October 8, 2026 (Illustrative client demo)
+Market data as of Oct 7 close. Fed funds 3.75–4.00% (raised Sep 16).
+
+THE READ
+The Committee's September 16 move to 3.75–4.00% keeps the front end anchored, and the minutes released Wednesday did nothing to unwind it. Inflation is still above target — August headline CPI 3.4% and August core CPI 2.4%, with August headline PCE 3.4% and August core PCE 3.0% — while the labor side has cooled: September payrolls +29,000, a September unemployment rate of 4.2% and September average hourly earnings +3.0% over the year, on Q2 2026 GDP of +2.2% (third estimate). That split — firm prices, softening jobs, a Committee still tightening — is the tension on the screen this morning. At the October 7 close the front end eased a touch — the 2-year at 4.77%, two basis points lower than the prior day, and the 1-year at 4.42%, down four — while the long end firmed, the 30-year at 5.67% and the 20-year at 5.71%, each three basis points higher on the day. The curve steepened modestly: 2s10s at +51 bp, three wider on the day, and 5s30s at +64 bp, also three wider, with 3M10Y unchanged at +106 bp. The 20-year prints four basis points above the 30-year. As arithmetic, the 2-year sits 89 bp above the 3.88% effective funds rate. For the illustrative book below, higher long-end par yields lower the market value of fixed-rate AFS securities and deepen unrealized marks, while the roughly $125M of securities cash flow due over the next twelve months turns over at new-money levels well above the 2.95% book yield. Both are facts the next EVE and AOCI run will carry; the figures that follow size each one, and none of this is a view on what to do with the portfolio.
+
+RATES (Oct 7 close; overnight and administered rates Oct 6 print)
+Treasury par curve: 3M 4.22% / 6M 4.28% / 1Y 4.42% / 2Y 4.77% / 3Y 4.87% / 5Y 5.03% / 7Y 5.15% / 10Y 5.28% / 20Y 5.71% / 30Y 5.67%
+Slopes: 2s10s +51 bp / 3M10Y +106 bp / 5s30s +64 bp
+EFFR 3.88% / SOFR 3.89% / 30-day avg SOFR 3.79% / IORB 3.90% / ON RRP 3.75% / discount window 4.00%
+30-year mortgage 7.28% / top 1-yr CD 4.75% / top HYSA 4.27%
+Equities (Oct 7 close): Nasdaq Composite 27,538.69 (−0.22%); Dow 51,179.87 (−0.66%)
+
+TODAY'S TIE-IN (illustrative ~$2.75B community bank)
+- Reinvestment: About $125M of securities cash flow comes due over the next twelve months at a 2.95% book yield; each 25 bp between that book yield and whatever it earns next is on the order of $313k a year, gross, full-year, full deployment.
+- AOCI: AOCI sits at −$41.4M, up $4.6M over three months; a further 25 bp rise across the curve is roughly $4.3M more in unrealized marks, taken at the whole securities portfolio's 4.2-year effective duration (the book states no AFS-only duration).
+- CD renewal: The $155M Q3 tranche at ~4.35% reprices against the sample bank's own 4.00–4.10% renewal defense band; renewing 25–35 bp below the tranche rate is ~$0.4–0.5M a year on that tranche.
+- EVE: EVE at +300 is −14.6%, beyond the internal −13.75% watch trigger but within the −25% policy limit; +200 is −9.1% and +100 −4.2%.
+
+Sample-data note: illustrative ~$2.75B community bank; book figures dated 30 Jun – 22 Aug 2026. Figures are illustrative and not investment advice.
+Sources: Federal Reserve H.15 & FOMC; NY Fed/FRED; U.S. Treasury; BLS; BEA; Freddie Mac PMMS; FDIC QBP; Bankrate (retrieved Oct 8, 2026).

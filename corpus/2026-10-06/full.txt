@@ -1,0 +1,53 @@
+Setnova Treasury Full Desk Read — Tuesday, October 6, 2026
+(Illustrative client demo)
+
+Market data as of Oct 5 close. Fed funds target 3.75%–4.00% (raised 25 bp Sep 16, 12–0).
+
+THE READ
+The FOMC raised the federal funds target range a quarter point to 3.75%–4.00% on September 16, by a 12–0 vote, with the statement calling inflation "elevated" and framing the move as support for a "timelier return" to the 2 percent goal. Inflation has not cooperated: August headline CPI ran 3.4% and core CPI 2.4%, while August headline PCE ran 3.4% and core PCE 3.0%. The September Summary of Economic Projections carried a median year-end 2026 funds rate of 4.1% (central tendency 4.1–4.4%).
+
+Against that backdrop the Treasury curve steepened on the week. Measured against the September 28 close five business days earlier, the front end fell — the 1-year off 12 bp to 4.47% and the 2-year off 8 bp to 4.84% — while the long end rose, the 10-year up 7 bp to 5.31% and the 30-year up 10 bp to 5.66%. That widened 2s10s from +32 bp to +47 bp. The front-end decline followed a soft September payrolls print (+29,000, released October 2); the long end reflects inflation still above target and the term structure of supply. The 2-year sits 96 bp above the 3.88% effective funds rate.
+
+For a deposit-funded book the week did two things at once. Higher long-end yields lower the market value of fixed-rate available-for-sale securities, so an AFS portfolio carries a modestly deeper unrealized mark than a week ago; at the same time, cash flowing off the book rolls into higher new-money yields than it carried. Both are facts to measure in the next EVE and AOCI run, not a single direction. Deposit competition has not eased: the top advertised 12-month CD on Bankrate's list is 4.50% and the top advertised savings rate 4.25%.
+
+RATES (Treasury par yields, Oct 5 close):
+  3M 4.22%  6M 4.30%  1Y 4.47%  2Y 4.84%  3Y 4.97%  5Y 5.06%  7Y 5.19%  10Y 5.31%  20Y 5.70%  30Y 5.66%
+  Slopes: 2s10s +47 bp, 3M10Y +109 bp, 5s30s +60 bp.
+  EFFR 3.88% (Oct 2 print); SOFR 3.88% (Oct 2 print); 30-day avg SOFR 3.78% (eff Oct 5); discount window 4.00% (Oct 5); 30Y mortgage 7.28% (Freddie, Oct 1).
+
+Macro prints: August headline CPI 3.4%, core CPI 2.4%; August headline PCE 3.4%, core PCE 3.0%; September payrolls +29,000, unemployment 4.2%, average hourly earnings +3.0% y/y; Q2 2026 real GDP +2.2% (third estimate).
+
+YOUR BALANCE SHEET THIS MORNING (illustrative ~$2.75B community bank; book figures dated 30 Jun – 22 Aug 2026):
+  NIM 3.32% (7 consecutive quarterly increases); cost of deposits 1.92% (beta 34% vs 45% modeled); AOCI −$41.4M (up $4.6M over three months, less negative); loans/deposits 85.1%; available liquidity $1,017M (37.0%); uninsured 27% (1.7x covered); Tier 1 leverage ratio 9.6% (vs 8.5% internal floor); EVE +300 −14.6% (watch −13.75% / limit −25%).
+
+TODAY'S TIE-IN:
+  - Securities cash flow: About $125M rolls off the book over the next year. Each 25 bp between the 2.95% book yield and whatever that cash earns next is on the order of $313k a year, gross, full-year, full deployment ($125M x 0.25%).
+  - CD maturities: The $155M Q3 tranche at ~4.35% reprices against the sample bank's own 4.00–4.10% renewal defense band. Renewing 25–35 bp below the tranche rate is ~$0.4–0.5M a year on that tranche.
+  - AOCI: The mark sits at −$41.4M, up $4.6M over three months (less negative). AOCI sensitivity is about $4.3M per 25 bp, taken at the whole securities portfolio's 4.2-year effective duration (the book states no AFS-only duration); with the long end higher on the week the mark is modestly lower.
+  - Interest-rate risk: EVE at +300 is −14.6%, beyond the internal −13.75% watch trigger but within the −25% policy limit; NII year-1 runs +2.1% at +100 and −2.4% at −100, inside the ±5% limit.
+
+DEPOSIT COMPETITION (Bankrate advertised best-rate lists; consumer yields, not a cost of funds):
+  - Top 12-month CD: 4.50% (Oct 5)
+  - Top high-yield savings: 4.25% (Oct 6)
+  Discount window primary credit 4.00% (Oct 5). FHLB advance and brokered CD rates are not shown: neither has a published primary-source quote for Oct 5's close.
+
+BANKING NEWS:
+  - Aug 25: FDIC Quarterly Banking Profile (Q2 2026): industry net income $90.1B, up 12.0% from the prior quarter; net interest margin 3.32%, up 1 bp from the prior quarter; domestic deposits grew 0.8%, the eighth consecutive quarterly increase. (FDIC)
+  - Oct 1: Freddie Mac Primary Mortgage Market Survey: 30-year fixed 7.28% (up from 7.03%), 15-year fixed 6.60% (up from 6.42%). (Freddie Mac PMMS)
+  - Oct 2: BLS Employment Situation (September 2026): nonfarm payrolls +29,000, unemployment 4.2%, average hourly earnings +3.0% over the year. (BLS)
+  - Sep 16: FOMC raised the federal funds target range 25 bp to 3.75-4.00% by a 12-0 vote. (Federal Reserve)
+  - Sep 29: Federal banking agencies published resolution plan feedback letters for 15 banking organizations. (Federal Reserve)
+
+REGULATORY WATCH:
+  - Sep 10 [Federal Reserve, FDIC, OCC · final action]: Agencies reduced regulatory burden for community banks and increased eligibility for the 18-month examination cycle.
+  - Sep 11 [Federal Reserve, FDIC, OCC · proposed (comment sought)]: Agencies sought comment on proposed third-party risk management guidance and issued a statement on community bank engagement with core service providers.
+  - Sep 24 [Federal Reserve · proposed (comment requested)]: Board requested comment on two proposals to establish a regulatory framework for Board-supervised payment stablecoin issuers under the GENIUS Act.
+  - Sep 30 [Federal Reserve · final rule]: Board finalized changes to enhance transparency and public accountability of its stress test and reduce volatility in stress-test-related capital requirements.
+  - Oct 2 [Federal Reserve · proposed (comment period extended)]: Board extended until November 4 the comment period on its proposal to modernize Regulation O (insider lending).
+
+THIS WEEK: Mon Oct 5 — No scheduled major economic release; Tue Oct 6 — BEA: U.S. International Trade in Goods and Services, August (8:30 AM ET); Fed: Vice Chair for Supervision Bowman, 'Modernizing Regulation and Supervision,' Community Banking Research Conference, St. Louis (10:45 AM ET); Wed Oct 7 — No scheduled major economic release; Thu Oct 8 — Fed: Governor Waller, 'Economic Outlook,' Istanbul Economic Forum; Fri Oct 9 — No scheduled major economic release
+NEXT WEEK: Oct 14: BLS CPI (September) and Real Earnings; Oct 15: BLS PPI (September); Oct 16: BLS Import/Export Price Indexes (September). Next FOMC Oct 27–28.
+
+The ~$2.75B bank shown is illustrative, for demonstration only, and not any specific institution. This material is measurement-led treasury and ALM support for community banks and credit unions; it is not investment advice.
+Sources: U.S. Treasury; Federal Reserve H.15 & FOMC; NY Fed; Freddie Mac PMMS; BLS; BEA; FDIC QBP; Bankrate (retrieved Oct 6, 2026)
+© 2026 Setnova Advisory · Treasury & ALM

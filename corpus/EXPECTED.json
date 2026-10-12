@@ -1,0 +1,28 @@
+{
+ "2026-10-06": {
+  "fails": [
+   "brand/full",
+   "brand/generic",
+   "dash/full",
+   "dash/generic"
+  ],
+  "why": {
+   "brand": "real defect: plain-text header 'Setnova Treasury \u2026' (bare masterbrand; RELEASE-QUEUE Q2, fixed 12 Oct)",
+   "dash": "real defect: '3.75-4.00%' printed with a hyphen in the email HTML (en dash required)"
+  }
+ },
+ "2026-10-07": {
+  "fails": [],
+  "why": {
+   "PASS": "clean sent edition; any new failure here is a false positive"
+  }
+ },
+ "2026-10-08": {
+  "fails": [
+   "brand/full"
+  ],
+  "why": {
+   "brand": "real defect: plain-text header 'SETNOVA TREASURY FULL DESK READ' (RELEASE-QUEUE Q2)"
+  }
+ }
+}

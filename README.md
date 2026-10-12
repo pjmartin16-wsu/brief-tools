@@ -17,3 +17,19 @@ so a change here takes effect only when the prompt's pin is updated too.
 A new rule must either replace an old one or come with a test: a seeded fixture in `SEEDS` that makes it FAIL.
 A quarterly pass (the "Setnova quarterly rule prune" scheduled task) lists the rules that no longer fire, and PM decides which to delete.
 A change here takes effect in the brief only when the hash pinned in the brief prompt is updated.
+
+## Regression corpus (added 12 Oct 2026)
+
+`corpus/<date>/` holds sent editions exactly as emailed (email HTML and plain text), and `corpus/EXPECTED.json`
+records which checks each one fails and why. `python3 run_corpus.py` runs the self-test and then every archived
+edition; GitHub Actions runs the same on every push (`.github/workflows/checks.yml`). A checker change may move the
+pin in the brief prompt only when that run is green. To accept a changed result on purpose, run
+`python3 run_corpus.py --update`, review the diff, and explain it in the commit message.
+Add each new sent edition (or any edition that exposed a false positive or a miss) as a new dated folder.
+
+## Prompts (added 12 Oct 2026)
+
+`prompts/PROMPT_LIVE.md` is the production brief prompt; `prompts/PROMPT_SLIM.md` is the slim candidate (D2), with
+the checker run on the drafts before anything is rendered. A scheduled task loads one of them by commit and SHA-256,
+so a change here takes effect only when the task's pin moves. Recipient addresses are supplied by the task prompt and
+are never stored in this public repo.
