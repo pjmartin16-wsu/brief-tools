@@ -181,6 +181,16 @@ class MC:
                     if k.startswith(lab) and lab not in self.rates and "AVG" not in k and "30" not in k:
                         self.rates[lab] = _val(o)
 
+        # G2a (12 Oct 2026): the 30-day SOFR average and SOFR's own date, by shape ("sofr_30d_avg" in the prompt).
+        self.sofr30, self.sofr_asof = None, None
+        for p, o in _walk(obj):
+            if p and isinstance(o, dict) and isinstance(o.get("asOf"), str) and _val(o) is not None:
+                key = p[-1].lower().replace("-", "_").replace(" ", "_")
+                if "sofr" in "/".join(p).lower() and re.search(r"30|avg|average", key) and self.sofr30 is None:
+                    self.sofr30 = (_val(o), o["asOf"][:10])
+                elif key == "sofr" and self.sofr_asof is None:
+                    self.sofr_asof = o["asOf"][:10]
+
     def dates(self):
         return sorted(self.hist)
 
@@ -545,6 +555,33 @@ def chk_qbp_basis(ed, mc, today):
     return out
 
 
+MON_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def _human(d):
+    y, m, dd = (int(x) for x in d.split("-"))
+    return f"{MON_ABBR[m - 1]} {dd}"
+
+
+def chk_sofr_avg(ed, mc, today):
+    """G2a (12 Oct 2026): a printed 30-day SOFR average equals marketclose.json and, when its NY Fed date differs
+    from SOFR's, carries its own date on the same line. 12 Oct: the Oct 9 record (3.82%) printed under "Oct 8"."""
+    if mc is None or mc.sofr30 is None:
+        return None
+    v, d = mc.sofr30
+    hd = _human(d)
+    out = []
+    for k, t in ed.vis.items():
+        for m in re.finditer(r"30-day (?:average )?SOFR(?: average)?(?:\s*\([^)\n]{0,20}\))?[^0-9%\n]{0,25}?(\d+\.\d\d)%", t, re.I):
+            if abs(float(m.group(1)) - round(v, 2)) > 0.005:
+                out.append(f"[{k}] 30-day SOFR average printed {m.group(1)}%, object {v:.2f}% ({hd}): {ctx(t, m.start(), m.end(), 30)}")
+            if mc.sofr_asof and mc.sofr_asof != d:
+                line = t[t.rfind("\n", 0, m.start()) + 1: (t.find("\n", m.end()) if t.find("\n", m.end()) >= 0 else len(t))]
+                if not re.search(r"\b" + re.escape(hd) + r"\b", line):
+                    out.append(f"[{k}] 30-day SOFR average without its own date ({hd}; SOFR is {_human(mc.sofr_asof)}): {ctx(t, m.start(), m.end(), 40)}")
+    return out
+
+
 def chk_dashes(ed, mc, today):
     """STEP 3: true minus for negatives and en dash for ranges, in the HTML (plain text is ASCII by design)."""
     out = []
@@ -577,6 +614,7 @@ CHECKS = [
     ("9h", "unconfirmed offers / tenor against the book", chk_offer),
     ("G1", "prose matches the grid", chk_prose_grid),
     ("G4c", "QBP comparison basis", chk_qbp_basis),
+    ("G2a", "30-day SOFR average value and its own date", chk_sofr_avg),
     ("dash", "minus signs and en dashes", chk_dashes),
     ("brand", "Setnova Advisory branding only", chk_brand),
 ]
@@ -650,7 +688,8 @@ MC_FIX = {
         "2026-10-07": {"3M": 4.23, "2Y": 4.77, "5Y": 5.03, "10Y": 5.28, "30Y": 5.67}},
     "policy": {"EFFR": {"value": 3.88, "source": "newyorkfed.org", "asOf": "2026-10-07"},
                "SOFR": {"value": 3.88, "source": "newyorkfed.org", "asOf": "2026-10-07"},
-               "IORB": {"value": 3.90, "source": "federalreserve.gov", "asOf": "2026-10-08"}},
+               "IORB": {"value": 3.90, "source": "federalreserve.gov", "asOf": "2026-10-08"},
+               "sofr_30d_avg": {"value": 3.79, "source": "markets.newyorkfed.org sofrai", "asOf": "2026-10-08"}},
     "news": [{"date": "2026-08-25", "title": "FDIC Quarterly Banking Profile Q2 2026", "source": "fdic.gov"}],
     "reg": [{"date": "2026-08-12", "agency": "OCC/FDIC", "title": "CRA proposal", "source": "federalregister.gov"}],
 }
@@ -661,6 +700,7 @@ CMN = ("<p>Friday, October 9, 2026 \u00b7 Market data as of Oct 8 close \u00b7 F
        "The FDIC reported the Q2 2026 net interest margin up 1 basis point from the prior quarter to 3.32%.</p>"
        "<p>3M 4.23% \u00b7 6M 4.30% \u00b7 1Y 4.44% \u00b7 2Y 4.75% \u00b7 5Y 4.99% \u00b7 10Y 5.22% \u00b7 30Y 5.60% \u00b7 2s10s +47 bp \u00b7 3M\u201310Y +99 bp \u00b7 5s30s +61 bp</p>"
        "<p>EFFR 3.88% \u00b7 SOFR 3.88% \u00b7 IORB 3.90%</p>"
+       "<p>The 30-day average SOFR (Oct 8) was 3.79%.</p>"
        "<p>The long end rallied on the day (the 10-year 6 bp below October 7, the 30-year 7 bp lower at 5.60%) and the curve was little changed on the week. "
        "Freddie Mac's survey put the 30-year fixed at 7.40% and the 15-year at 6.73%, both up from the prior week (7.28% / 6.60%).</p>"
        "<p>The 30-year fell 7 bp from October 7. The 2s10s slope steepened 15 bp to +41 bp since September 30. The top 1-year CD APY on Bankrate's list was 4.45%. "
@@ -720,6 +760,8 @@ SEEDS = [
     ("G1", "generic", "text", "the 10-year at 5.22%", "the 10-year at 5.31%", "24 Sep: prose level not the grid's"),
     ("G1", "full", "email_html", "a +47 bp 2s10s slope", "a +26 bp 2s10s slope", "25 Sep: slope stated against the grid"),
     ("G4c", "full", "file_html", "up 1 basis point from the prior quarter to 3.32%", "up 1 basis point to 3.32%", "25 Sep: QBP change with no basis"),
+    ("G2a", "generic", "email_html", "The 30-day average SOFR (Oct 8) was 3.79%.", "The 30-day average SOFR was 3.79%.", "12 Oct: average printed without its own NY Fed date"),
+    ("G2a", "full", "text", "(Oct 8) was 3.79%", "(Oct 8) was 3.82%", "12 Oct: average value not the object's"),
     ("dash", "full", "email_html", "\u221214.6%", "-14.6%", "hyphen-minus negative"),
     ("brand", "generic", "email_html", "Treasury Brief", "Setnova Treasury Morning Brief", "bare masterbrand (F4)"),
     ("G8", "generic", "file_html", "6M 4.30%", "6M 4.31%", "21 Aug: editions disagree"),
@@ -756,7 +798,7 @@ def self_test():
           "".join(f"<td>{v}</td>" for v in ("4.23", "4.30", "4.44", "4.75", "4.99", "5.22", "5.60")) + "</tr></table>"
     old_lad = CMN[CMN.index("<p>3M 4.23%"):CMN.index("</p>", CMN.index("<p>3M 4.23%")) + 4]
     body = CMN.replace(old_lad, lad + "<p>2s10s +47 bp \u00b7 3M\u201310Y +99 bp \u00b7 5s30s +61 bp</p>").replace(
-        "IORB 3.90%</p>", "IORB 3.90%; 30-day average SOFR 3.79%.</p>")
+        "IORB 3.90%</p>", "IORB 3.90%; 30-day average SOFR (Oct 8) 3.79%.</p>")
     reg = [Ed("full", email_html=_email(body + FULL_BODY, "FULL DESK READ"), text=_text(CMN + FULL_BODY)),
            Ed("generic", email_html=_email(body, "DESK READ"), text=_text(CMN))]
     bad = [r for r in run(reg, mc, "2026-10-09") if r["status"] == "FAIL"]
