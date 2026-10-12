@@ -81,7 +81,7 @@ The wording scans, change-basis arithmetic, plain-text-vs-HTML figures, prose-vs
 (2) `python3 setnova-tools/setnova_checks.py --self-test` must end "SELF-TEST PASS"; anything else is a (1) failure.
 (3) Write the six inputs to files and run, after 5b and before STEP 5d:
 python3 setnova-tools/setnova_checks.py --mc marketclose.json --full-file {full.html} --full-email {full_email.html} --full-text {full.txt} --generic-file {generic.html} --generic-email {generic_email.html} --generic-text {generic.txt} --today {YYYY-MM-DD} --json checks.json
-Do not pass --subject flags.
+Also pass --subject-generic "{the exact Generic subject}" --subject-full "{the exact Full Desk Read subject}" (PM, 12 Oct 2026, D1: both subjects begin "Setnova Advisory Treasury"; the checker's brand check covers them).
 (4) Exit 0 = PASS. Exit 1: fix each real defect in the edition (never in the script; never by changing marketclose.json to fit a printed figure) and re-run; at most two rounds. Nothing has been rendered yet, so no re-render. If FAILs remain, send anyway (PM is the only recipient) and send the DEGRADED RUN alert listing every remaining hit verbatim with your one-line view of each (real defect / false positive). Exit 2 = input error: fix once and re-run; still 2 = a (1) failure.
 
 === STEP 5d · RENDER ONCE AND READ (after STEP 5c) ===
@@ -91,8 +91,8 @@ If a layout or render fix changes any visible text or figure, re-run the STEP 5c
 
 === STEP 6 · DELIVER — EMAIL IS MANDATORY ===
 Two separate emails with mcp__Gmail__send_message (load via ToolSearch if needed), to ["{RECIPIENT}"]:
-  EMAIL 1, Generic: subject "Setnova Treasury Morning Brief — {Weekday}, {Month D, YYYY}"; htmlBody = the Generic email-safe HTML; body = its plain-text part.
-  EMAIL 2, Full Desk Read: subject "Setnova Treasury Full Desk Read — {Weekday}, {Month D, YYYY} (Illustrative client demo)"; htmlBody = the Full email-safe HTML; body = its plain-text part.
+  EMAIL 1, Generic: subject "Setnova Advisory Treasury Morning Brief — {Weekday}, {Month D, YYYY}"; htmlBody = the Generic email-safe HTML; body = its plain-text part.
+  EMAIL 2, Full Desk Read: subject "Setnova Advisory Treasury Full Desk Read — {Weekday}, {Month D, YYYY} (Illustrative client demo)"; htmlBody = the Full email-safe HTML; body = its plain-text part.
 No attachments (CORE RULES). LABEL EACH MESSAGE IMMEDIATELY AFTER ITS OWN SEND, before the next send: mcp__Gmail__label_message with Label_15 ("Setnova/Morning Brief"); create the label only if labelling fails because it does not exist. Never delete these emails.
 SendUserFile both HTML files (display "render") with a one-line summary, both PDFs (attach), and marketclose.json (attach, caption "MarketClose — this run's working object (schema 1.0); the Desk loads the tape from STEP 6c."). This is a convenience only; email is what counts.
 IF A SEND FAILS: retry once; then retry with the plain-text body only. If email is impossible, say so at the very top of the report with the verbatim error. Whenever an edition fails, ships degraded or ends unlabelled, or STEP 5c could not run or ended with FAILs, send ONE plain-text email to {RECIPIENT}, subject "Setnova pipeline — DEGRADED RUN {YYYY-MM-DD}", naming exactly what happened with the verbatim error. Every channel attempted gets a line in the report: SUCCEEDED with its id, or FAILED with its verbatim error.

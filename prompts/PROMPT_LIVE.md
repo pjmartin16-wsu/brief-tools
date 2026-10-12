@@ -101,7 +101,7 @@ WHY: on 29 Sep both plain-text parts carried a line the HTML lacked and this run
 (2) SELF-TEST. `python3 setnova-tools/setnova_checks.py --self-test` must end with "SELF-TEST PASS". Anything else is a (1) failure: a checker that no longer catches the known errors is not used.
 (3) INPUTS. marketclose.json carries "curve_history": {"YYYY-MM-DD": {"3M": v, "6M": v, "1Y": v, "2Y": v, "5Y": v, "10Y": v, "30Y": v}, ...} with the FIVE closes before the curve's close, copied from the rows of Treasury's daily par yield table that this run fetched for G4d (holidays have no row; use the rows the table lists). Write each edition's plain-text part to a file before sending. Then run, after STEP 5b and before STEP 6:
 python3 setnova-tools/setnova_checks.py --mc marketclose.json --full-file {full file html} --full-email {full email html} --full-text {full plain text} --generic-file {generic file html} --generic-email {generic email html} --generic-text {generic plain text} --today {YYYY-MM-DD} --json checks.json
-Do not pass the --subject flags (the subject-line wording is PM's open decision).
+Also pass --subject-generic "{the exact Generic subject}" --subject-full "{the exact Full Desk Read subject}" (PM, 12 Oct 2026, D1: both subjects begin "Setnova Advisory Treasury"; the checker's brand check covers them).
 (4) VERDICT. Exit 0 = PASS. Exit 1: each FAIL hit is either a real defect, which you fix in the edition (never in the checker, and never by changing marketclose.json to fit a printed figure), re-render and re-run; or a checker false positive. At most two fix rounds. If any FAIL remains after the second, send the editions anyway (they go only to PM) and send the DEGRADED RUN alert listing every remaining hit verbatim with your one-line view of each (real defect / false positive). Exit 2 = input error: fix the input once and re-run; if it is still 2, treat it as a (1) failure.
 (5) WHERE THE SCRIPT AND YOU DISAGREE, THE SCRIPT WINS. A FAIL it prints is not cleared by your own reading. Its PASS does not excuse the judgement gates it does not cover.
 
@@ -109,12 +109,12 @@ Do not pass the --subject flags (the subject-line wording is PM's open decision)
 Send TWO separate emails with mcp__Gmail__send_message (load it with ToolSearch first if it is not already available). Each edition is its own email so it stands alone as a forwardable artifact.
   EMAIL 1 — the Generic edition (this is the subscriber-facing product):
     to: ["{RECIPIENT}"]
-    subject: "Setnova Treasury Morning Brief — {Weekday}, {Month D, YYYY}"
+    subject: "Setnova Advisory Treasury Morning Brief — {Weekday}, {Month D, YYYY}"
     htmlBody: the EMAIL-SAFE generic HTML from step 5b
     body: a plain-text alternative (headline, the rates list INCLUDING EVERY TENOR OF THE HTML CURVE LADDER — at minimum 3M, 6M, 1Y, 2Y, 5Y, 10Y, 30Y — the three balance-sheet bullets, disclaimer); see scan (9e)
   EMAIL 2 — the Full Desk Read:
     to: ["{RECIPIENT}"]
-    subject: "Setnova Treasury Full Desk Read — {Weekday}, {Month D, YYYY} (Illustrative client demo)"
+    subject: "Setnova Advisory Treasury Full Desk Read — {Weekday}, {Month D, YYYY} (Illustrative client demo)"
     htmlBody: the EMAIL-SAFE full-desk HTML from step 5b
     body: plain-text alternative (headline, rates list INCLUDING EVERY TENOR OF THE HTML CURVE LADDER — at minimum 3M, 6M, 1Y, 2Y, 5Y, 10Y, 30Y — the four dollar tie-in bullets, sample-data note, disclaimer); see scan (9e)
 SEND NO ATTACHMENTS AT ALL - not the PDFs, not the emblem. WHY (decided by PM 2026-08-28, after an audit found that no brief on 26, 27 or 28 August carried its PDF and the run had been silently falling back to the no-attachment retry every day): attaching a PDF requires the whole file as one unbroken base64 string passed verbatim into the send call, and a brief PDF is 200-350KB, i.e. 300-470KB of base64. A string that long does not survive being relayed; a probe on 2026-08-28 truncated an 18KB PDF to 3.8KB, and the Gmail send tool ACCEPTED the truncated file without error - a corrupt attachment sends just as successfully as a good one, so this failure can never be detected from the send result. This is the same class of tooling limit as the inline emblem (STEP 4) and it is settled the same way: the EMAIL HTML IS THE ARTIFACT, and Gmail under Label_15 is the permanent archive. Do not reintroduce attachments, do not try to work around this with chunking or a smaller PDF, and do not add a download link until setnovaadvisory.com can host one. The footers carry no PDF-edition line (removed 29 Sep 2026; not a confirmed offer term).
