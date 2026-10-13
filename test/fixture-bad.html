@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{font-family:Arial;margin:20px;width:1000px}
+table{width:100%;border-collapse:collapse}
+td{vertical-align:top;padding:9px 9px 9px 0;line-height:1.5;font-size:12px}
+</style></head><body>
+
+<!-- CLIP: text drawn above the viewBox, as the CD schedule did -->
+<svg viewBox="0 0 400 100" width="400"><rect x="10" y="5" width="60" height="95" fill="#0A2A5E"/>
+<text x="40" y="-12" font-size="11">$155M</text></svg>
+
+<!-- OVERLAP: two labels on the same pixels, as the gap chart did -->
+<div style="position:relative;height:60px">
+  <span style="position:absolute;left:100px;top:20px">-217</span>
+  <span style="position:absolute;left:96px;top:22px">3-12 mo</span>
+</div>
+
+<!-- GUTTER: a circle series using only the right half of its canvas -->
+<svg viewBox="0 0 400 100" width="400">
+  <circle cx="240" cy="50" r="3"/><circle cx="270" cy="45" r="3"/><circle cx="300" cy="40" r="3"/>
+  <circle cx="330" cy="35" r="3"/><circle cx="360" cy="30" r="3"/><circle cx="390" cy="25" r="3"/>
+</svg>
+
+<!-- IMBAL: one-line cells beside a four-line cell, as the pricing table did -->
+<table><tbody><tr>
+  <td style="width:31%">Short</td><td style="width:20%">$12,000</td><td style="width:20%">$18,000</td>
+  <td style="font-size:11.5px">A deliberately long description that will certainly wrap to
+      five or six separate lines inside this narrow cell, so that the imbalance check has
+      something real to find, leaving the three short cells to its left floating in a large
+      amount of dead vertical whitespace exactly as was reported on the pricing sheet.</td>
+</tr></tbody></table>
+
+</body></html>

@@ -39,3 +39,21 @@ are never stored in this public repo.
 The mechanical half of the weekly audit's "PM DECISION LIST": the OPEN and ANSWERED rows of `00_Context/DECISIONS.md`,
 and the `_LOG.md` lines from the last 8 days that ask something of PM. The audit only matches those lines to rows by meaning.
 It closes the one POLICY BREACH in the 10 Oct rule prune (a rule added with no test). `python3 decision_list.py --self-test`.
+
+## One rule file, one command (13 Oct 2026, checker-efficiency #5 and #7)
+
+- **`setnova_rules.json`** holds every wording list: the brief's (retired wording, advice, expectations, producer and offer
+  wording, captions, the Sources-line families, the dateline, the FRED same-close series) and the release gate's (Shelf B,
+  verdict and verb gates, never-say, superseded prices, real institutions, retired figures). It is read by
+  `setnova_checks.py`, `brief_tape_check.py`, `releasecheck.py` and the Desk's `tools/marketclose-check.ts` (which carries a
+  byte copy, tested against the pin). Each consumer pins the file's SHA-256, so pinning a script pins its rules.
+  Before 13 Oct the brief, the Desk tape check and the release gate each kept their own copy, and they had drifted.
+- **`selftest_all.py`** runs every checker's self-test, the regression corpus, the tally self-test, the tape check on the
+  13 Oct production tape and `layoutaudit.py` on its bad fixture. CI runs it on every push. `releasecheck.py`,
+  `layoutaudit.py` and `claims_review_by.py` moved here from the workspace's `06_Projects/_tools/` (fixtures in `test/`).
+- **`tally.py`** (#7) keeps score per check: real catches and false alarms on archived sent editions (from the
+  "real defect" / "false positive" reasons in `corpus/EXPECTED.json`), plus pre-send catches from the brief run's
+  "Checker first-pass" lines, kept in `corpus/FIRST-PASS.txt`. The quarterly prune reads this instead of re-reading editions.
+- **New checks (13 Oct):** `src` (the Sources line names every source family used), `dateline` (no single
+  "Market data as of" over figures with other dates; RELEASE-QUEUE Q4) and `G2b` (every FRED figure is as fresh as
+  FRED's own data file; FX had no check before).

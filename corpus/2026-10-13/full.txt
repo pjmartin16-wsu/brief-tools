@@ -1,0 +1,46 @@
+TREASURY FULL DESK READ - Setnova Advisory
+Tuesday, October 13, 2026 · Market data as of Oct 9 close · Fed funds 3.75–4.00% (raised Sep 16)
+
+A hiking Fed, a 2s10s slope of +44 bp and September CPI on Wednesday, read against an illustrative book.
+
+THE READ
+The Federal Reserve raised the federal funds target range by a quarter point to 3.75–4.00% on Sep 16, a 12–0 vote, and the September projections put the median federal funds rate at 4.1% for the end of 2026 (central tendency 4.1–4.4%). August headline CPI ran 3.4% and core CPI 2.4%; August headline PCE ran 3.4% and core PCE 3.0%; September nonfarm payrolls rose 29,000 and the September unemployment rate was 4.2%. September CPI is due Wednesday, Oct 14, the week's main data point.
+
+Treasury's Oct 9 close put the 2-year at 4.80%, the 10-year at 5.24% and the 30-year at 5.60%, leaving 2s10s at +44 bp, 3 bp flatter than the day before. On the week, the 10-year is down 4 bp and the 2-year down 3 bp, while the 3-month bill is up 6 bp at 4.25%. Overnight money sits inside the range: EFFR printed 3.88% on Oct 8, with IORB at 3.90%.
+
+For the illustrative ~$2.75B bank, the week's small decline in intermediate yields moves AOCI only at the margin: sensitivity is about $4.3M per 25 bp on the $410M AFS book, taken at the whole securities portfolio's 4.2-year effective duration (the book states no AFS-only duration). The larger exposure is on the funding side, where the $155M Q3 tranche at ~4.35% reprices against the sample bank's own 4.00–4.10% renewal defense band while the top 12-month CD APY on Bankrate's list is 4.75%. Under the +300 shock, EVE at −14.6% is beyond the internal −13.75% watch trigger but within the −25% policy limit.
+
+RATES (Oct 9 close; Oct 8 policy rates)
+Fed funds target: 3.75–4.00% (raised Sep 16 · 12–0)
+IORB: 3.90% (eff. Sep 17)
+ON RRP: 3.75% (eff. Sep 17)
+EFFR: 3.88% (Oct 8 print)
+SOFR: 3.87% (Oct 8 print)
+30-day SOFR avg: 3.82% (Oct 9)
+Primary credit: 4.00% (eff. Sep 17)
+FOMC median, end-2026: 4.1% (central tendency 4.1–4.4%)
+30-yr mortgage: 7.40% (Freddie · Oct 8)
+15-yr mortgage: 6.73% (Freddie · Oct 8)
+Treasury curve, Oct 9 close: 3M 4.25% / 6M 4.32% / 1Y 4.47% / 2Y 4.80% / 3Y 4.89% / 5Y 5.02% / 7Y 5.13% / 10Y 5.24% / 20Y 5.65% / 30Y 5.60%
+Slopes: 2s10s +44 bp / 3M10Y +99 bp / 5s30s +58 bp
+Headline CPI: 3.4% (August, y/y)
+Core CPI: 2.4% (August, y/y)
+Headline PCE: 3.4% (August, y/y)
+Core PCE: 3.0% (August, y/y)
+Unemployment rate: 4.2% (September)
+Nonfarm payrolls: +29,000 (September)
+Avg hourly earnings: +3.0% (September, y/y)
+Real GDP: 2.2% (Q2, third estimate)
+
+Illustrative ~$2.75B community bank · book figures dated 30 Jun – 22 Aug 2026; each figure's own date is on the Desk
+TODAY'S TIE-IN (illustrative sample book)
+- Securities cash flow. About $125M of securities cash flow arrives over the next 12 months. Each 25 bp between the 2.95% book yield and whatever it earns next is on the order of $313k a year, gross, full-year, full deployment; no tenor named.
+- AOCI. AOCI stands at −$41.4M. Sensitivity is about $4.3M per 25 bp on the $410M AFS book, taken at the whole securities portfolio's 4.2-year effective duration (the book states no AFS-only duration).
+- CD maturity schedule. The $155M Q3 tranche at ~4.35% reprices against the sample bank's own 4.00–4.10% renewal defense band; renewing 25–35 bp below the tranche rate is ~$0.4–0.5M a year on that tranche.
+- Liquidity. Available liquidity of $1,017M (37.0% of assets) covers the $606M of uninsured deposits 1.7×; FHLB borrowing is $165M drawn against $375M available.
+
+Wholesale benchmark: the Fed's primary credit (discount window) rate is 4.00%, effective Sep 17. FHLB advance and brokered CD rates are not shown: neither has a published primary-source quote for Oct 9's close.
+
+Sample note: every balance-sheet figure belongs to an illustrative ~$2.75B community bank, not a real institution, and no client data is used. Not investment advice.
+Sources: Federal Reserve (FOMC, H.10 and press releases); NY Fed/FRED; U.S. Treasury; BLS; BEA; Freddie Mac PMMS; EIA; Bankrate (retrieved Oct 13, 2026)
+© 2026 Setnova Advisory · Treasury & ALM

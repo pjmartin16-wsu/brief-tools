@@ -4,25 +4,65 @@
    "brand/full",
    "brand/generic",
    "dash/full",
-   "dash/generic"
+   "dash/generic",
+   "dateline/full",
+   "dateline/generic",
+   "src/full",
+   "src/generic"
   ],
   "why": {
-   "brand": "real defect: plain-text header 'Setnova Treasury \u2026' (bare masterbrand; RELEASE-QUEUE Q2, fixed 12 Oct)",
-   "dash": "real defect: '3.75-4.00%' printed with a hyphen in the email HTML (en dash required)"
+   "brand": "real defect: plain-text header 'Setnova Treasury …' (bare masterbrand; RELEASE-QUEUE Q2, fixed 12 Oct)",
+   "dash": "real defect: '3.75-4.00%' printed with a hyphen in the email HTML (en dash required)",
+   "dateline": "real defect: dateline 'Market data as of Oct 5 close' over figures carrying other dates (13 Oct Number Verifier HOLD; RELEASE-QUEUE Q4; check added 13 Oct)",
+   "src": "real defect: WTI printed (Sep 29) with no EIA in the Sources line (check added 13 Oct)"
   }
  },
  "2026-10-07": {
-  "fails": [],
+  "fails": [
+   "dateline/full",
+   "dateline/generic",
+   "src/full",
+   "src/generic"
+  ],
   "why": {
-   "PASS": "clean sent edition; any new failure here is a false positive"
+   "dateline": "real defect: dateline 'Market data as of Oct 6 close' over figures carrying other dates (13 Oct Number Verifier HOLD; RELEASE-QUEUE Q4; check added 13 Oct)",
+   "src": "real defect: WTI printed with no EIA in the Sources line (check added 13 Oct)",
+   "note": "was the clean control until 13 Oct; its only failures are the two checks added that day"
   }
  },
  "2026-10-08": {
   "fails": [
-   "brand/full"
+   "brand/full",
+   "dateline/full",
+   "src/full"
   ],
   "why": {
-   "brand": "real defect: plain-text header 'SETNOVA TREASURY FULL DESK READ' (RELEASE-QUEUE Q2)"
+   "brand": "real defect: plain-text header 'SETNOVA TREASURY FULL DESK READ' (RELEASE-QUEUE Q2)",
+   "dateline": "real defect: dateline 'Market data as of Oct 7 close' over figures carrying other dates (13 Oct Number Verifier HOLD; RELEASE-QUEUE Q4; check added 13 Oct)",
+   "src": "real defect: WTI printed with no EIA in the Sources line (check added 13 Oct)"
+  }
+ },
+ "2026-10-13": {
+  "fails": [
+   "dateline/full",
+   "dateline/generic"
+  ],
+  "why": {
+   "dateline": "real defect: dateline 'Market data as of Oct 9 close' over figures carrying other dates (13 Oct Number Verifier HOLD; RELEASE-QUEUE Q4; check added 13 Oct); the HOLD's own edition",
+   "note": "live PROMPT_LIVE.md run; passes every other check, G2a included (30-day SOFR average 3.82% labelled Oct 9, RELEASE-QUEUE Q3 closed)"
+  }
+ },
+ "2026-10-13-shadow": {
+  "fails": [
+   "dateline/full",
+   "dateline/generic",
+   "src/full",
+   "src/generic"
+  ],
+  "why": {
+   "dateline": "real defect: dateline 'Market data as of Oct 9 close' over figures carrying other dates (13 Oct Number Verifier HOLD; RELEASE-QUEUE Q4; check added 13 Oct)",
+   "src": "real defect: Brent/WTI (EIA) and NCUA system figures printed; the Sources line names neither (13 Oct shadow review; RELEASE-QUEUE Q5)",
+   "note": "PROMPT_SLIM.md shadow run (subjects checked as the production subjects it would have used)"
   }
  }
 }

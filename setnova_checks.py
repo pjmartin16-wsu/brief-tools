@@ -21,7 +21,7 @@ MarketClose object). A brief may be sent only on exit 0.
 Every check has a seeded fixture in --self-test that must make it FAIL; a rule without a test is
 not a rule. Add the fixture first when adding a rule.
 """
-import argparse, datetime as dt, html, json, re, sys
+import argparse, datetime as dt, hashlib, html, json, os, re, sys
 from html.parser import HTMLParser
 
 # ---------------------------------------------------------------- text extraction
@@ -191,6 +191,18 @@ class MC:
                 elif key == "sofr" and self.sofr_asof is None:
                     self.sofr_asof = o["asOf"][:10]
 
+        # G2b (13 Oct 2026): FRED figures ("series" key, or a FRED/H.10 source) and the data-file headers the run read.
+        self.fred_figs, self.fred_headers = [], {}
+        for p, o in _walk(obj):
+            if p and p[-1] == "fred_headers" and isinstance(o, dict):
+                self.fred_headers.update({str(k): v for k, v in o.items() if isinstance(v, dict)})
+        for p, o in _walk(obj):
+            if not (p and isinstance(o, dict) and isinstance(o.get("asOf"), str)) or "fred_headers" in p:
+                continue
+            src = str(o.get("source", ""))
+            if "series" in o or re.search(r"\bFRED\b|H\.10|DTWEX|DEXUS|DEXJP|SP500|NASDAQCOM|DJIA", src, re.I):
+                self.fred_figs.append(("/".join(p), o))
+
     def dates(self):
         return sorted(self.hist)
 
@@ -214,24 +226,40 @@ class MC:
 
 
 # ---------------------------------------------------------------- wording lists (from the brief prompt)
-RETIRED = ["single observation date", "ALCO-as-a-Service", "so are AFS marks", "AFS marks are higher", "dot plot clusters",
-           "nationally available", "top online", "top posted", "135-155", "135\u2013155", "1.7-1.9M", "1.7\u20131.9M",
-           "as of 6/30/26", "improved $4.6M", "Tier-1", "ALCO support", "regional banks", "in front of your ALCO", "DXY"]
-RETIRED_RE = [r"\bgold\b[^.\n]{0,25}\$?\d", r"capital ratio[^.\n]{0,30}9\.6%|9\.6%[^.\n]{0,30}capital ratio", r"EVE of -\d"]
-ADVICE_RE = [r"\bextend(s|ed|ing)? duration", r"\bshorten(s|ed|ing)? duration", r"\b(add|adding|reduce|reducing) duration",
-             r"\bladdering\b", r"\bladder(s|ed)? (maturities|CDs|securities|the book|into)", r"\block(s|ed|ing)? in (rates|yields|funding|a rate|the rate|at)\b",
-             r"\brotat(e|es|ed|ing) into\b", r"\breinvest(s|ed|ing)? (in|into)\b", r"\bwe recommend\b", r"\byou should\b",
-             r"\bshould (buy|sell)\b", r"\bconsider (buying|selling)\b"]
-EXPECT = ["market pricing", "markets price", "priced in", "priced earlier", "pricing leans", "leans toward", "markets expect", "odds of", "probability of a"]
-PRODUCER = ["not retrieved", "pinned", "cross-foot to the ALCO pack", "in the object", "summary at foot", "single obs",
-            "file and PDF editions", "shown in the file", "PDF edition", "full labels", "per-class", "(verified)", "(carryover)", "Full sources in the footer"]
-OFFER = ["Daily Desk Read", "available on request", "working session", "deep-dive", "deep dive", "Ways to Work", "How Setnova Helps", "every morning"]
-KPI_FULL = ["7 consecutive quarterly increases", "beta 34% vs 45% modeled", "up $4.6M over three months, less negative",
-            "$1,910M / $2,245M", "37.0% of assets", "1.7\u00d7 covered", "vs 8.5% internal floor", "watch \u221213.75% / limit \u221225%"]
-STALE_CAPTIONS = ["$6.3M", "4th straight", "4th consecutive", "1.6\u00d7", "1.6x"]
-EMAIL_BANNED = ["<style", "class=", "linear-gradient", "rgba(", "href=", "<img", "cid:"]
-SECONDARY = ["kbra", "moody", "fitch", "s&p global ratings", "american banker", "reuters", "bloomberg", "law360", "jdsupra",
-             "lexology", "law firm", "llp", "wsj", "cnbc", "seeking alpha"]
+# The wording lists live in setnova_rules.json, the one rule file this checker, brief_tape_check.py, the Desk's
+# tools/marketclose-check.ts and releasecheck.py all read (13 Oct 2026, checker-efficiency #5: the copies had drifted).
+# Its SHA-256 is pinned here, so pinning this script's hash in the brief prompt pins the rules too.
+RULES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setnova_rules.json")
+RULES_SHA256 = "b57c578cff621bfe45d466a97bb7bbff1ced94703ba0bd29decb13133afe6dbe"
+
+
+def load_rules(path=RULES_FILE, want=RULES_SHA256):
+    try:
+        raw = open(path, "rb").read()
+    except OSError as ex:
+        sys.exit(f"INPUT ERROR: rules file unreadable: {ex}")
+    got = hashlib.sha256(raw).hexdigest()
+    if got != want:
+        print(f"INPUT ERROR: {os.path.basename(path)} sha256 {got} != pinned {want}", file=sys.stderr)
+        sys.exit(2)
+    return json.loads(raw.decode("utf-8"))
+
+
+RULES = load_rules()
+_B, _R = RULES["brief"], RULES["release"]
+RETIRED = _B["retired_literal"]
+RETIRED_RE = _B["retired_re"] + [p for k in _B["also_apply"]["retired"] for p in _R[k.split(".", 1)[1]]]
+ADVICE_RE = _B["advice_re"] + [p for k in _B["also_apply"]["advice"] for p in _R[k.split(".", 1)[1]]]
+EXPECT = _B["expect_literal"]
+PRODUCER = _B["producer_literal"]
+OFFER = _B["offer_literal"]
+KPI_FULL = _B["kpi_full_literal"]
+STALE_CAPTIONS = _B["stale_captions_literal"]
+EMAIL_BANNED = _B["email_banned_literal"]
+SECONDARY = _B["secondary_sources_literal"]
+SOURCES_REQUIRED = _B["sources_required"]
+DATELINE_BANNED = _B["dateline_banned_re"]
+FRED_SAME_CLOSE = set(_B["fred_same_close_series"])
 
 TENOR_WORDS = [(r"(?<!\d)3-month|three-month|\b3M\b", "3M"), (r"(?<!\d)6-month|six-month|\b6M\b", "6M"), (r"(?<!\d)1-year|one-year|\b1Y\b", "1Y"),
                (r"(?<!\d)2-year|two-year|\b2Y\b", "2Y"), (r"(?<!\d)3-year|three-year|\b3Y\b", "3Y"), (r"(?<!\d)5-year|five-year|\b5Y\b", "5Y"),
@@ -598,6 +626,55 @@ def chk_brand(ed, mc, today):
     return out
 
 
+def chk_sources(ed, mc, today):
+    """src (13 Oct 2026): every figure family or agency in the body is named in the one Sources line."""
+    out = []
+    for k, t in ed.vis.items():
+        ms = list(re.finditer(r"\bSources:", t))
+        if not ms:
+            continue  # 5b6 reports a missing Sources line
+        body, foot = t[:ms[-1].start()], t[ms[-1].end():ms[-1].end() + 600]
+        for r in SOURCES_REQUIRED:
+            hit = re.search(r["body_re"], body)
+            if hit and not re.search(r["sources_re"], foot):
+                out.append(f"[{k}] {r['label']}: the body has '{hit.group(0)}' but the Sources line names no /{r['sources_re']}/")
+    return out
+
+
+def chk_dateline(ed, mc, today):
+    """dateline (13 Oct 2026, RELEASE-QUEUE Q4): no single market as-of over figures that carry other dates."""
+    out = []
+    for k, t in ed.vis.items():
+        out += [f"[{k}] {h}" for h in find_re(t, DATELINE_BANNED)]
+    return out
+
+
+def chk_fred(mc):
+    """G2b (13 Oct 2026): FRED freshness from the data-file header (fred.stlouisfed.org/data/<ID>.txt) the run recorded.
+    Series pages and CSVs can serve a stale cache (9 Oct); FX had no check at all (10 Oct close-out, 'item 8')."""
+    if mc is None:
+        return None
+    out = []
+    for path, o in mc.fred_figs:
+        sid, a = o.get("series"), o["asOf"][:10]
+        if not sid:
+            out.append(f"{path}: FRED figure (asOf {a}) carries no \"series\" id")
+            continue
+        h = mc.fred_headers.get(str(sid))
+        end = str((h or {}).get("range_end", ""))[:10]
+        if not re.match(r"20\d\d-\d\d-\d\d$", end):
+            out.append(f"{path}: no fred_headers.{sid}.range_end recorded (read fred.stlouisfed.org/data/{sid}.txt)")
+            continue
+        if a > end:
+            out.append(f"{path}: {sid} asOf {a} is after FRED's last observation {end}")
+        elif sid in FRED_SAME_CLOSE:
+            if mc.close and a != mc.close:
+                out.append(f"{path}: {sid} asOf {a} is not the curve's close {mc.close}")
+        elif a != end:
+            out.append(f"{path}: {sid} printed for {a} but FRED's data file runs to {end} (stale)")
+    return out
+
+
 CHECKS = [
     ("5b5", "email hygiene and contrast", chk_email_hygiene),
     ("5b6", "provenance leak", chk_provenance),
@@ -617,6 +694,8 @@ CHECKS = [
     ("G2a", "30-day SOFR average value and its own date", chk_sofr_avg),
     ("dash", "minus signs and en dashes", chk_dashes),
     ("brand", "Setnova Advisory branding only", chk_brand),
+    ("src", "Sources line names every source used", chk_sources),
+    ("dateline", "no single market as-of over mixed dates", chk_dateline),
 ]
 
 
@@ -654,6 +733,12 @@ def run(eds, mc, today):
     g8 = chk_g8(eds, mc)
     rows.append({"check": "G8", "title": "cross-edition consistency", "edition": "both",
                  "status": "SKIP" if g8 is None else ("PASS" if not g8 else "FAIL"), "hits": g8 or []})
+    try:
+        g2b = chk_fred(mc)
+    except Exception as e:
+        g2b = [f"checker error: {type(e).__name__}: {e}"]
+    rows.append({"check": "G2b", "title": "FRED figures as fresh as FRED's data file", "edition": "object",
+                 "status": "SKIP" if g2b is None else ("PASS" if not g2b else "FAIL"), "hits": g2b or []})
     return rows
 
 
@@ -690,10 +775,14 @@ MC_FIX = {
                "SOFR": {"value": 3.88, "source": "newyorkfed.org", "asOf": "2026-10-07"},
                "IORB": {"value": 3.90, "source": "federalreserve.gov", "asOf": "2026-10-08"},
                "sofr_30d_avg": {"value": 3.79, "source": "markets.newyorkfed.org sofrai", "asOf": "2026-10-08"}},
+    "fx": {"eur_usd": {"value": 1.1259, "source": "FRED DEXUSEU (Fed H.10)", "asOf": "2026-10-02", "series": "DEXUSEU"}},
+    "equities": {"sp500": {"value": 7765.36, "source": "FRED SP500", "asOf": "2026-10-08", "series": "SP500"}},
+    "fred_headers": {"DEXUSEU": {"last_updated": "2026-10-05 3:16 PM CDT", "range_end": "2026-10-02"},
+                     "SP500": {"last_updated": "2026-10-08 7:01 PM CDT", "range_end": "2026-10-08"}},
     "news": [{"date": "2026-08-25", "title": "FDIC Quarterly Banking Profile Q2 2026", "source": "fdic.gov"}],
     "reg": [{"date": "2026-08-12", "agency": "OCC/FDIC", "title": "CRA proposal", "source": "federalregister.gov"}],
 }
-CMN = ("<p>Friday, October 9, 2026 \u00b7 Market data as of Oct 8 close \u00b7 Fed funds 3.75\u20134.00% (raised Sep 16)</p>"
+CMN = ("<p>Friday, October 9, 2026 \u00b7 Treasury curve as of Oct 8 close \u00b7 Fed funds 3.75\u20134.00% (raised Sep 16)</p>"
        "<p>August headline CPI ran 3.4% and August headline PCE 3.4% (core CPI 2.4%, core PCE 3.0%); September payrolls slowed to +29,000 and the unemployment rate rose to 4.2%.</p>"
        "<p>The curve stayed positively sloped at the October 8 close, the 2-year at 4.75% and the 10-year at 5.22%, a +47 bp 2s10s slope; the 10-year closed 6 bp below October 7 and the 30-year 7 bp lower at 5.60%. "
        "On the week the 10-year was 2 bp lower than October 1. The 2-year sits 87 bp above the 3.88% effective funds rate. "
@@ -709,7 +798,7 @@ FULL_BODY = ("<p>NIM 3.32% (7 consecutive quarterly increases) \u00b7 Cost of de
              "Loans / deposits 85.1% ($1,910M / $2,245M) \u00b7 Avail. liquidity $1,017M (37.0% of assets) \u00b7 Uninsured 27% (1.7\u00d7 covered) \u00b7 Tier 1 leverage ratio 9.6% (vs 8.5% internal floor) \u00b7 EVE +300 \u221214.6% (watch \u221213.75% / limit \u221225%)</p>"
              "<p>Each 25 bp between that book yield and whatever it earns next is on the order of $313k a year, gross, full-year, full deployment ($125M \u00d7 0.25%). "
              "AOCI sensitivity \u2248 $4.3M per 25 bp, taken at the whole securities portfolio\u2019s 4.2-year effective duration (the book states no AFS-only duration). The roughly $125M of cash flow is measured at the book's 4.2-year effective duration.</p>")
-FOOT = "<p>Sources: Federal Reserve H.15 &amp; FOMC; NY Fed/FRED; U.S. Treasury; BLS; BEA; FDIC QBP (retrieved Oct 9, 2026).</p>"
+FOOT = "<p>Sources: Federal Reserve H.15 &amp; FOMC; NY Fed/FRED; U.S. Treasury; BLS; BEA; Freddie Mac PMMS; FDIC QBP; Bankrate (retrieved Oct 9, 2026).</p>"
 
 
 def _email(body, banner):
@@ -736,8 +825,8 @@ def _fixture():
 SEEDS = [
     ("5b5", "full", "email_html", '<tr><td bgcolor="#0A2A5E" style="background-color:#0A2A5E">', '<tr><td style="background:#0A2A5E">', "26 Aug: navy masthead lost, white text on white"),
     ("5b5", "generic", "email_html", "</td></tr></table></td></tr></table>", '<img src="cid:logo"></td></tr></table></td></tr></table>', "26 Aug: cid images stripped by Gmail"),
-    ("5b5", "full", "email_html", "Market data as of Oct 8 close", "Market data as of the", "26 Aug: dangling dateline fragment"),
-    ("5b6", "generic", "file_html", "Market data as of Oct 8 close", "Market data as of 2026-10-08 close (H.15 released 2026-10-09)", "28 Aug: ISO dates and release mechanics"),
+    ("5b5", "full", "email_html", "Treasury curve as of Oct 8 close", "Treasury curve as of the", "26 Aug: dangling dateline fragment"),
+    ("5b6", "generic", "file_html", "Treasury curve as of Oct 8 close", "Treasury curve as of 2026-10-08 close (H.15 released 2026-10-09)", "28 Aug: ISO dates and release mechanics"),
     ("5b7", "full", "email_html", "up $4.6M over three months", "improved $6.3M QoQ", "3 Sep: stale AOCI caption"),
     ("5b7", "full", "text", "up $4.6M over three months", "up $4.6M QoQ", "29 Sep/30 Sep: QoQ on a monthly series"),
     ("5b7b", "generic", "email_html", "EFFR 3.88%", "DXY 99.2 \u00b7 EFFR 3.88%", "25 Sep: broad dollar labelled DXY"),
@@ -765,6 +854,23 @@ SEEDS = [
     ("dash", "full", "email_html", "\u221214.6%", "-14.6%", "hyphen-minus negative"),
     ("brand", "generic", "email_html", "Treasury Brief", "Setnova Treasury Morning Brief", "bare masterbrand (F4)"),
     ("G8", "generic", "file_html", "6M 4.30%", "6M 4.31%", "21 Aug: editions disagree"),
+    # 13 Oct 2026: shared rules file (#5), the release gate's lists now also apply to the brief, and three new checks.
+    ("5b7b", "full", "text", "The 2-year sits", "The CD tower rolls next quarter. The 2-year sits", "release-gate vocabulary (CD tower), now shared"),
+    ("5b8", "generic", "email_html", "The 2-year sits", "Banks can lock in term funding here. The 2-year sits", "13 Oct: 'lock in term funding' passed the old pattern"),
+    ("5b8", "full", "file_html", "The 2-year sits", "Duration positioning matters now. The 2-year sits", "release gate Shelf B, now shared"),
+    ("src", "generic", "email_html", "</p><p>EFFR", " WTI spot $96.24 (Oct 6).</p><p>EFFR", "13 Oct shadow: oil printed, EIA not in the Sources line"),
+    ("src", "full", "text", "The FDIC increased", "NCUA reported assets of $2.50 trillion. The FDIC increased", "13 Oct shadow: NCUA figures, NCUA not in the Sources line"),
+    ("dateline", "generic", "email_html", "Treasury curve as of Oct 8 close", "Market data as of Oct 8 close", "13 Oct Number Verifier HOLD: one as-of over mixed dates (Q4)"),
+]
+
+# (why, mutation of a deep copy of MC_FIX) for the object-level G2b check
+MC_SEEDS = [
+    ("13 Oct: FX printed for Oct 2 while FRED's data file already runs to Oct 9 (stale)",
+     lambda m: m["fred_headers"]["DEXUSEU"].update(range_end="2026-10-09")),
+    ("FRED figure with no data-file header recorded", lambda m: m["fred_headers"].pop("SP500")),
+    ("FRED figure with no series id", lambda m: m["fx"]["eur_usd"].pop("series")),
+    ("equity close not the curve's close", lambda m: m["equities"]["sp500"].update(asOf="2026-10-07")),
+    ("9 Oct: a date FRED does not have yet", lambda m: m["fx"]["eur_usd"].update(asOf="2026-10-05")),
 ]
 
 
@@ -792,6 +898,14 @@ def self_test():
         rs = run([Ed(n, **p) for n, p in f2.items()], mc, "2026-10-09")
         hit = [r for r in rs if r["check"] == cid and r["status"] == "FAIL"]
         print(f"  {'caught' if hit else 'MISSED'}  {cid:5} {why}")
+        ok &= bool(hit)
+    import copy
+    for why, mut in MC_SEEDS:
+        m2 = copy.deepcopy(MC_FIX)
+        mut(m2)
+        rs = run([Ed(n, **pp) for n, pp in _fixture().items()], MC(m2), "2026-10-09")
+        hit = [r for r in rs if r["check"] == "G2b" and r["status"] == "FAIL"]
+        print(f"  {'caught' if hit else 'MISSED'}  G2b   {why}")
         ok &= bool(hit)
     # Regression (8 Oct 2026): email-only editions whose HTML ladder prints bare numbers, plus a 30-day SOFR average.
     lad = "<table><tr>" + "".join(f"<td>{t}</td>" for t in ("3M", "6M", "1Y", "2Y", "5Y", "10Y", "30Y")) + "</tr><tr>" + \

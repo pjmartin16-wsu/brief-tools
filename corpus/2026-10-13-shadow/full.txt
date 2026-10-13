@@ -1,0 +1,95 @@
+TREASURY FULL DESK READ
+Tuesday, October 13, 2026  |  Market data as of Oct 9 close  |  Fed funds 3.75-4.00% (raised Sep 16)
+Setnova Advisory - Treasury & ALM
+
+September CPI lands Wednesday with the 2-year 92 bp above the 3.88% effective funds rate and the long end above 5%.
+
+THE READ
+Wednesday's September CPI is the week's test, and the inflation backdrop going into it is still above the 2% goal on every measure: August headline CPI 3.4% and August core CPI 2.4%, with August headline PCE 3.4% and August core PCE 3.0%. The labor side is softer: September payrolls rose 29,000 and the September unemployment rate was 4.2%. The FOMC raised the target range a quarter point to 3.75-4.00% on September 16 by a 12-0 vote, and the September projections put the 2026 median for the federal funds rate at 4.1% (central tendency 4.1-4.4%).
+
+Friday's close moved the front of the curve more than the long end. The 2-year closed at 4.80%, 5 bp higher than the day before, and the 10-year at 5.24%, 2 bp higher than the day before; the 30-year was unchanged at 5.60%. On the week the 2-year is 3 bp lower than Oct 2 and the 10-year 4 bp lower, leaving 2s10s at +44 bp. The 2-year sits 92 bp above the 3.88% effective funds rate.
+
+For the sample bank the same levels cut both ways. New-money yields above 5% across the belly and long end sit well above its 2.95% securities book yield. The same yields hold its $410M of fixed-rate AFS securities under pressure, which is where AOCI (-$41.4M) and the EVE profile register it: the +300 EVE result of -14.6% sits beyond the internal -13.75% watch trigger but within the -25% policy limit. Funding has not eased either. The top of Bankrate's one-year CD list is 4.75% against the sample bank's 4.09% weighted CD cost.
+
+RATES (Oct 9 close - Oct 8 policy rates)
+Fed funds target 3.75-4.00% | Effective funds 3.88% | SOFR 3.87% | IORB 3.90% | Discount window 4.00%
+2-year 4.80% | 5-year 5.02% | 10-year 5.24% | 30-year 5.60% | 30Y mortgage 7.40%
+Treasury par yields at the Oct 9 close. Effective funds and SOFR for Oct 8, NY Fed via FRED. IORB 3.90% and ON RRP 3.75% per the Sep 16 FOMC implementation note. Mortgage: Freddie Mac PMMS, Oct 8.
+
+CURVE LADDER (Oct 9 close)
+3M 4.25% | 6M 4.32% | 1Y 4.47% | 2Y 4.80% | 5Y 5.02% | 10Y 5.24% | 30Y 5.60%
+Change vs Oct 2 close (bp): 3M +6 | 6M +5 | 1Y +1 | 2Y -3 | 5Y -4 | 10Y -4 | 30Y -3
+Slopes: 2s10s +44 bp | 3M-10Y +99 bp | 5s30s +58 bp
+
+THIS WEEK
+MON 12  Columbus Day holiday
+TUE 13  Treasury announces 4-, 8- and 17-week bill auctions  (today)
+WED 14  September CPI and real earnings  8:30 ET
+WED 14  Beige Book; 17-week bill auction  2:00 ET
+THU 15  September PPI; 4- and 8-week bill auctions  8:30 ET
+FRI 16  September import and export prices  8:30 ET
+SAT 17  FOMC blackout begins (Oct 27-28 meeting)
+Ahead: 13- and 26-week bill auctions Mon Oct 19; 20-year bond reopening auction Wed Oct 21; FOMC meeting Oct 27-28.
+Oct 14: Vice Chair for Supervision Bowman, discussion on supervision and regulation, IIF Annual Membership Summit, Bangkok (on the Board's published calendar)
+Oct 15: Chair Warsh, conversation with IMF Managing Director Georgieva, Bangkok (on the Board's published calendar)
+
+MATCHED-TERM MARGINAL FUNDING
+Matched-term funding: only retail quotes have a primary source for Oct 9's close, so the comparison table is not shown. Discount window (primary credit) 4.00%. FHLB advance and brokered CD rates are not shown: neither has a published primary-source quote for Oct 9's close.
+
+DEPOSIT COMPETITION (Top APY)
+12-month CD: 4.75% (E*TRADE)
+High-yield savings: 4.27% (Peak Bank)
+Each figure is the top of Bankrate's list for that product. These are advertised consumer yields, not comparable one-for-one with a wholesale rate or a cost of funds. Bankrate, retrieved Oct 13, 2026.
+
+MARKETS ACROSS THE TAPE
+Equities closed higher on Oct 9: the S&P 500 at 7,811.54, the Nasdaq Composite at 27,366.17 and the Dow at 51,654.95. The dollar and oil figures carry their own earlier dates; Brent spot at $125.44 (Oct 6) stands far above WTI at $96.24, an energy-price backdrop that sits under Wednesday's CPI.
+S&P 500: 7,811.54 (Oct 9)
+Nasdaq Composite: 27,366.17 (Oct 9)
+Dow Jones Industrial Average: 51,654.95 (Oct 9)
+Broad dollar index: 121.38 (Oct 2)
+EUR / USD: 1.1259 (Oct 2)
+USD / JPY: 157.81 (Oct 2)
+WTI (Cushing) spot: $96.24 (Oct 6)
+Brent spot: $125.44 (Oct 6)
+
+YOUR BALANCE SHEET THIS MORNING
+Illustrative ~$2.75B community bank - book figures dated 30 Jun - 22 Aug 2026; each figure's own date is on the Desk
+NIM: 3.32% (7 consecutive quarterly increases)
+Cost of deposits: 1.92% (beta 34% vs 45% modeled)
+AOCI: -$41.4M (up $4.6M over three months, less negative)
+Loans / deposits: 85.1% ($1,910M / $2,245M)
+Avail. liquidity: $1,017M (37.0% of assets)
+Uninsured: 27% (1.7x covered)
+Tier 1 leverage ratio: 9.6% (vs 8.5% internal floor)
+EVE +300: -14.6% (watch -13.75% / limit -25%)
+
+TODAY'S TIE-IN
+- About $125M of securities cash flow comes due over the next twelve months against a 2.95% book yield. Each 25 bp between that book yield and whatever it earns next is on the order of $313k a year, gross, full-year, full deployment ($125M x 0.25%).
+- The $155M Q3 tranche at ~4.35% reprices against the sample bank's own 4.00-4.10% renewal defense band; renewing 25-35 bp below the tranche rate is ~$0.4-0.5M a year on that tranche.
+- AOCI sits at -$41.4M, up $4.6M over three months. Roughly $4.3M of AOCI moves per 25 bp, taken at the whole securities portfolio's 4.2-year effective duration (the book states no AFS-only duration); yields above 5% across the belly and long end keep that mark under pressure.
+- The +300 EVE position is -14.6%, beyond the internal -13.75% watch trigger but within the -25% policy limit, on a balance sheet carrying $560M of securities and $265M of equity; it is the figure to carry into the next ALCO review.
+
+BANKING NEWS
+Oct 8, 2026 [Federal Reserve] Enforcement action against American Express Company over detection and reporting of suspicious activity related to money laundering.
+Oct 5, 2026 [Federal Reserve] Approved Isabella Bank Corporation's acquisition of Grand River Commerce, Inc. (Grand River Bank, Grandville, Mich.).
+Sep 14, 2026 [NCUA] Q2 2026 credit union system data: assets $2.50 trillion, up 5.0% over the year; insured shares and deposits $1.91 trillion, up 4.3%; delinquency rate 96 basis points.
+
+REGULATORY WATCH
+Oct 5, 2026 [Federal Reserve, FDIC, OCC] guidance: Joint statement on community banks' engagement with core service providers (SR 26-7).
+Oct 2, 2026 [Federal Reserve] proposed: Regulation O (credit to insiders) modernization: comment period extended to Nov 4.
+Aug 5, 2026 [NCUA] final: Eleven final rules from the Deregulation Project, effective 30 days after Federal Register publication.
+
+TREASURY DESK WATCH
+- Evaluate: September CPI (Wed Oct 14) against August's 3.4% headline and 2.4% core: what a 25 bp move in short rates does to year-1 NII at a 34% realized beta versus the 45% modeled.
+- Model: EVE at the current curve, with the +300 result (-14.6%) beyond the -13.75% watch trigger and inside the -25% limit, and how far the +200 result (-9.1%) sits from it.
+- Compare: Offered CD renewal rates against the sample bank's 4.00-4.10% defense band and the 4.75% top one-year CD on Bankrate's list, tranche by tranche across the $525M CD maturity schedule.
+- Scenario-test: Liquidity coverage of uninsured deposits (1.7x covered, $1,017M available) under a deposit-outflow shock, including $375M of FHLB capacity with $165M drawn.
+- Evaluate: AOCI sensitivity of roughly $4.3M per 25 bp, taken at the whole securities portfolio's 4.2-year effective duration, against the $265M equity base.
+- Compare: The cost of each funding source by tenor on all-in economics once primary-source wholesale quotes are available, with the discount window at 4.00% as the reference point.
+
+Make this brief about your book.
+Setnova Advisory provides measurement-led treasury and ALM support for community banks and credit unions.
+
+Illustrative figures for a hypothetical ~$2.75B institution, shown for demonstration only; not investment advice.
+Sources: Federal Reserve H.15 & FOMC; NY Fed/FRED; U.S. Treasury; BLS; BEA; Freddie Mac PMMS; Bankrate (retrieved Oct 13, 2026)
+(c) 2026 Setnova Advisory - Treasury & ALM

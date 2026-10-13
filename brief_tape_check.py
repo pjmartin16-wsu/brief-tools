@@ -1,16 +1,29 @@
 """Brief-side check of marketclose_desk.json (setnova-marketclose-3.0), 7 Oct 2026.
 The Morning Brief run has no copy of the Desk, so it runs this (standard library only) before attaching the tape.
 It mirrors src/schema/market.ts and tools/marketclose-check.ts; tests/engine/bridge.test.ts runs both on the same
-files and requires the same verdict. Usage: python3 brief_tape_check.py marketclose_desk.json  -> exit 0 = PASS."""
-import json, re, sys
+files and requires the same verdict. Both read the barred wording from setnova_rules.json (13 Oct 2026), and both refuse
+unknown top-level keys (the Desk ignored them until 13 Oct). Usage: python3 brief_tape_check.py marketclose_desk.json  -> exit 0 = PASS."""
+import hashlib, json, os, re, sys
 
 RATE_IDS = {"ff", "effr", "sofr", "t2", "t5", "t10", "s210", "t30", "mtg30", "fhlb3", "cd12", "hysa"}
 CLASSES = {"pol", "ref", "tsy", "mtg", "dep", "whl"}
 NEEDED = ["t2", "t5", "t10", "cd12"]
-RETIRED = [r"dot plot clusters", r"nationally available", r"top online", r"top posted", r"\bDXY\b", r"market pricing", r"markets price",
-           r"priced in", r"pricing leans", r"leans toward", r"markets expect", r"\b(extend|extending|shorten|shortening) duration\b",
-           r"\b(add|reduce) duration\b", r"\bladder(ing)?\b", r"\block in\b", r"\bwe recommend\b", r"\byou should\b"]
-CASE_SENSITIVE = {r"\bDXY\b"}
+# Barred commentary wording comes from setnova_rules.json, the one rule file shared with setnova_checks.py, the Desk's
+# tools/marketclose-check.ts and releasecheck.py (13 Oct 2026). Its hash is pinned here, so this script's pin pins the rules.
+RULES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "setnova_rules.json")
+RULES_SHA256 = "b57c578cff621bfe45d466a97bb7bbff1ced94703ba0bd29decb13133afe6dbe"
+
+
+def barred_patterns(path=RULES_FILE, want=RULES_SHA256):
+    raw = open(path, "rb").read()
+    if hashlib.sha256(raw).hexdigest() != want:
+        raise ValueError(f"{os.path.basename(path)} does not match the pinned sha256 {want}")
+    rules = json.loads(raw.decode("utf-8"))
+    out = []
+    for ref in rules["tape"]["commentary_barred_from"]:
+        sec, key = ref.split(".", 1)
+        out += [re.escape(x) if key.endswith("_literal") else x for x in rules[sec][key]]
+    return out
 
 
 def check(t):
@@ -76,8 +89,8 @@ def check(t):
             if not (isinstance(pn, list) and len(pn) <= 4 and all(isinstance(p, dict) and ne(p.get("t")) and ne(p.get("p")) for p in pn)): e.append("commentary.panels: up to 4 {t, p}")
             if not e:
                 text = "\n".join([co["note"], *rd, *[x for p in pn for x in (p["t"], p["p"])]])
-                for pat in RETIRED:
-                    if re.search(pat, text, 0 if pat in CASE_SENSITIVE else re.I): e.append(f"commentary: retired or barred wording /{pat}/")
+                for pat in barred_patterns():
+                    if re.search(pat, text, re.I): e.append(f"commentary: retired or barred wording /{pat}/")
                 if re.search(r"<[a-z/][^>]*>", text, re.I): e.append("commentary: carries markup; the tape holds plain text")
     extra = set(t) - {"meta", "classes", "rates", "curve", "week", "news", "reg", "paths", "commentary"}
     if extra: e.append("unknown top-level keys: " + ", ".join(sorted(extra)))
@@ -89,7 +102,10 @@ if __name__ == "__main__":
         tape = json.load(open(sys.argv[1], encoding="utf-8"))
     except Exception as x:
         print(f"TAPE FAIL: not JSON: {x}"); sys.exit(1)
-    errs = check(tape)
+    try:
+        errs = check(tape)
+    except (OSError, ValueError) as x:
+        print(f"TAPE FAIL: rules file: {x}"); sys.exit(1)
     if errs:
         print("TAPE FAIL:\n  " + "\n  ".join(errs)); sys.exit(1)
     print("TAPE PASS"); sys.exit(0)

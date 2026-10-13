@@ -1,0 +1,44 @@
+TREASURY MORNING BRIEF - Setnova Advisory
+Tuesday, October 13, 2026 · Market data as of Oct 9 close · Fed funds 3.75–4.00% (raised Sep 16)
+
+A hiking Fed, a 2s10s slope of +44 bp and September CPI on Wednesday.
+
+THE READ
+The Federal Reserve raised the federal funds target range by a quarter point to 3.75–4.00% on Sep 16, a 12–0 vote, and the September projections put the median federal funds rate at 4.1% for the end of 2026 (central tendency 4.1–4.4%). August headline CPI ran 3.4% and core CPI 2.4%; August headline PCE ran 3.4% and core PCE 3.0%; September nonfarm payrolls rose 29,000 and the September unemployment rate was 4.2%. September CPI is due Wednesday, Oct 14, the week's main data point.
+
+Treasury's Oct 9 close put the 2-year at 4.80%, the 10-year at 5.24% and the 30-year at 5.60%, leaving 2s10s at +44 bp, 3 bp flatter than the day before. On the week, the 10-year is down 4 bp and the 2-year down 3 bp, while the 3-month bill is up 6 bp at 4.25%. Overnight money sits inside the range: EFFR printed 3.88% on Oct 8, with IORB at 3.90%.
+
+For a deposit-funded balance sheet the week's move is small but two-sided. Slightly lower intermediate yields lift AFS market values at the margin and trim new-money yields by the same few basis points; both show up in the next AOCI and EVE run. On the funding side, the top 12-month CD APY on Bankrate's list is 4.75%, above the effective funds rate of 3.88%, so renewal betas on maturing CDs are being tested against a retail bid above overnight wholesale money.
+
+RATES (Oct 9 close; Oct 8 policy rates)
+Fed funds target: 3.75–4.00% (raised Sep 16 · 12–0)
+IORB: 3.90% (eff. Sep 17)
+ON RRP: 3.75% (eff. Sep 17)
+EFFR: 3.88% (Oct 8 print)
+SOFR: 3.87% (Oct 8 print)
+30-day SOFR avg: 3.82% (Oct 9)
+Primary credit: 4.00% (eff. Sep 17)
+FOMC median, end-2026: 4.1% (central tendency 4.1–4.4%)
+30-yr mortgage: 7.40% (Freddie · Oct 8)
+15-yr mortgage: 6.73% (Freddie · Oct 8)
+Treasury curve, Oct 9 close: 3M 4.25% / 6M 4.32% / 1Y 4.47% / 2Y 4.80% / 3Y 4.89% / 5Y 5.02% / 7Y 5.13% / 10Y 5.24% / 20Y 5.65% / 30Y 5.60%
+Slopes: 2s10s +44 bp / 3M10Y +99 bp / 5s30s +58 bp
+Headline CPI: 3.4% (August, y/y)
+Core CPI: 2.4% (August, y/y)
+Headline PCE: 3.4% (August, y/y)
+Core PCE: 3.0% (August, y/y)
+Unemployment rate: 4.2% (September)
+Nonfarm payrolls: +29,000 (September)
+Avg hourly earnings: +3.0% (September, y/y)
+Real GDP: 2.2% (Q2, third estimate)
+
+WHAT IT MEANS FOR YOUR BALANCE SHEET
+- Deposits. Renewal betas are now being tested against a 4.75% top 12-month CD APY on Bankrate's list while SOFR sits at 3.87%. What a treasury team would measure: how much of the maturing CD book renews above the effective funds rate, and what that does to the marginal cost of deposits.
+- Investments. On the week the 5-year is down 4 bp and the 10-year down 4 bp: new-money yields are marginally lower and AFS market values marginally higher. Both show up in the next AOCI and EVE run.
+- IRR / ALCO. The Sep 16 hike and a +44 bp 2s10s slope set the base case for the next NII and EVE run. Measure repricing gaps against an effective funds rate of 3.88% and the 2-year at 4.80%, and test whether modeled deposit betas match realized betas since the hike; for credit unions the same move feeds the NEV and 5300 figures.
+
+Wholesale benchmark: the Fed's primary credit (discount window) rate is 4.00%, effective Sep 17. FHLB advance and brokered CD rates are not shown: neither has a published primary-source quote for Oct 9's close.
+
+Generic — not tied to any institution; not investment advice. Figures are taken from the primary sources named below, each with its own date.
+Sources: Federal Reserve (FOMC, H.10 and press releases); NY Fed/FRED; U.S. Treasury; BLS; BEA; Freddie Mac PMMS; EIA; Bankrate (retrieved Oct 13, 2026)
+© 2026 Setnova Advisory · Treasury & ALM

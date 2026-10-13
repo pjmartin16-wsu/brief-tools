@@ -21,7 +21,12 @@ EXPECTED = os.path.join(CORPUS, "EXPECTED.json")
 
 def run_case(date):
     d = os.path.join(CORPUS, date)
-    args = [sys.executable, CHECKER, "--today", date]
+    meta = json.load(open(os.path.join(d, "meta.json"))) if os.path.exists(os.path.join(d, "meta.json")) else {}
+    args = [sys.executable, CHECKER, "--today", meta.get("today", date[:10])]
+    for ed in ("full", "generic"):
+        subj = (meta.get(ed) or {}).get("subject_checked")
+        if subj:
+            args += [f"--subject-{ed}", subj]
     for ed in ("full", "generic"):
         for part, flag in (("_file.html", "file"), ("_email.html", "email"), (".txt", "text")):
             p = os.path.join(d, ed + part)

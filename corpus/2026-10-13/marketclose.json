@@ -1,0 +1,139 @@
+{
+ "schema": "setnova-marketclose-1.0",
+ "curve": {
+  "3M": {
+   "value": 4.25,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "6M": {
+   "value": 4.32,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "1Y": {
+   "value": 4.47,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "2Y": {
+   "value": 4.8,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "3Y": {
+   "value": 4.89,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "5Y": {
+   "value": 5.02,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "7Y": {
+   "value": 5.13,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "10Y": {
+   "value": 5.24,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "20Y": {
+   "value": 5.65,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  },
+  "30Y": {
+   "value": 5.6,
+   "source": "home.treasury.gov",
+   "asOf": "2026-10-09"
+  }
+ },
+ "curve_history": {
+  "2026-10-08": {
+   "3M": 4.23,
+   "6M": 4.3,
+   "1Y": 4.44,
+   "2Y": 4.75,
+   "3Y": 4.85,
+   "5Y": 4.99,
+   "7Y": 5.11,
+   "10Y": 5.22,
+   "20Y": 5.64,
+   "30Y": 5.6
+  },
+  "2026-10-07": {
+   "3M": 4.22,
+   "6M": 4.28,
+   "1Y": 4.42,
+   "2Y": 4.77,
+   "3Y": 4.87,
+   "5Y": 5.03,
+   "7Y": 5.15,
+   "10Y": 5.28,
+   "20Y": 5.71,
+   "30Y": 5.67
+  },
+  "2026-10-06": {
+   "3M": 4.21,
+   "6M": 4.28,
+   "1Y": 4.46,
+   "2Y": 4.79,
+   "3Y": 4.88,
+   "5Y": 5.03,
+   "7Y": 5.15,
+   "10Y": 5.27,
+   "20Y": 5.68,
+   "30Y": 5.64
+  },
+  "2026-10-05": {
+   "3M": 4.22,
+   "6M": 4.3,
+   "1Y": 4.47,
+   "2Y": 4.84,
+   "3Y": 4.97,
+   "5Y": 5.06,
+   "7Y": 5.19,
+   "10Y": 5.31,
+   "20Y": 5.7,
+   "30Y": 5.66
+  },
+  "2026-10-02": {
+   "3M": 4.19,
+   "6M": 4.27,
+   "1Y": 4.46,
+   "2Y": 4.83,
+   "3Y": 4.96,
+   "5Y": 5.06,
+   "7Y": 5.17,
+   "10Y": 5.28,
+   "20Y": 5.67,
+   "30Y": 5.63
+  }
+ },
+ "policy": {
+  "EFFR": {
+   "value": 3.88,
+   "source": "newyorkfed.org",
+   "asOf": "2026-10-08"
+  },
+  "SOFR": {
+   "value": 3.87,
+   "source": "newyorkfed.org",
+   "asOf": "2026-10-08"
+  },
+  "IORB": {
+   "value": 3.9,
+   "source": "federalreserve.gov",
+   "asOf": "2026-10-09"
+  },
+  "sofr_30d_avg": {
+   "value": 3.81569,
+   "source": "markets.newyorkfed.org sofrai",
+   "asOf": "2026-10-09"
+  }
+ }
+}

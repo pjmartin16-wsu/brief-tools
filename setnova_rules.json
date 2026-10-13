@@ -1,0 +1,324 @@
+{
+ "_about": "Setnova wording rules: the ONE list read by setnova_checks.py (Morning Brief), brief_tape_check.py and the Desk's tools/marketclose-check.ts (the Desk tape), and releasecheck.py (anything leaving the workspace). Created 13 Oct 2026 (checker-efficiency #5) from the lists those files carried separately. Each consumer pins this file's SHA-256, so a change here takes effect only when that pin moves. Every list has a seeded fixture in its consumer's self-test. The quarterly rule prune reviews this file.",
+ "brief": {
+  "retired_literal": [
+   "single observation date",
+   "ALCO-as-a-Service",
+   "so are AFS marks",
+   "AFS marks are higher",
+   "dot plot clusters",
+   "nationally available",
+   "top online",
+   "top posted",
+   "135-155",
+   "135–155",
+   "1.7-1.9M",
+   "1.7–1.9M",
+   "as of 6/30/26",
+   "improved $4.6M",
+   "Tier-1",
+   "ALCO support",
+   "regional banks",
+   "in front of your ALCO",
+   "DXY"
+  ],
+  "retired_re": [
+   "\\bgold\\b[^.\\n]{0,25}\\$?\\d",
+   "capital ratio[^.\\n]{0,30}9\\.6%|9\\.6%[^.\\n]{0,30}capital ratio",
+   "EVE of -\\d"
+  ],
+  "advice_re": [
+   "\\bextend(s|ed|ing)? duration",
+   "\\bshorten(s|ed|ing)? duration",
+   "\\b(add|adding|reduce|reducing) duration",
+   "\\bladdering\\b",
+   "\\bladder(s|ed)? (maturities|CDs|securities|the book|into)",
+   "\\block(?:s|ed|ing)? in\\b",
+   "\\brotat(e|es|ed|ing) into\\b",
+   "\\breinvest(s|ed|ing)? (in|into)\\b",
+   "\\bwe recommend\\b",
+   "\\byou should\\b",
+   "\\bshould (buy|sell)\\b",
+   "\\bconsider (buying|selling)\\b"
+  ],
+  "expect_literal": [
+   "market pricing",
+   "markets price",
+   "priced in",
+   "priced earlier",
+   "pricing leans",
+   "leans toward",
+   "markets expect",
+   "odds of",
+   "probability of a"
+  ],
+  "producer_literal": [
+   "not retrieved",
+   "pinned",
+   "cross-foot to the ALCO pack",
+   "in the object",
+   "summary at foot",
+   "single obs",
+   "file and PDF editions",
+   "shown in the file",
+   "PDF edition",
+   "full labels",
+   "per-class",
+   "(verified)",
+   "(carryover)",
+   "Full sources in the footer"
+  ],
+  "offer_literal": [
+   "Daily Desk Read",
+   "available on request",
+   "working session",
+   "deep-dive",
+   "deep dive",
+   "Ways to Work",
+   "How Setnova Helps",
+   "every morning"
+  ],
+  "kpi_full_literal": [
+   "7 consecutive quarterly increases",
+   "beta 34% vs 45% modeled",
+   "up $4.6M over three months, less negative",
+   "$1,910M / $2,245M",
+   "37.0% of assets",
+   "1.7× covered",
+   "vs 8.5% internal floor",
+   "watch −13.75% / limit −25%"
+  ],
+  "stale_captions_literal": [
+   "$6.3M",
+   "4th straight",
+   "4th consecutive",
+   "1.6×",
+   "1.6x"
+  ],
+  "email_banned_literal": [
+   "<style",
+   "class=",
+   "linear-gradient",
+   "rgba(",
+   "href=",
+   "<img",
+   "cid:"
+  ],
+  "secondary_sources_literal": [
+   "kbra",
+   "moody",
+   "fitch",
+   "s&p global ratings",
+   "american banker",
+   "reuters",
+   "bloomberg",
+   "law360",
+   "jdsupra",
+   "lexology",
+   "law firm",
+   "llp",
+   "wsj",
+   "cnbc",
+   "seeking alpha"
+  ],
+  "_note_advice_re": "13 Oct 2026: the lock-in pattern widened to any 'lock in' (the Desk tape list had it; the brief's narrower form passed 'lock in term funding'). The bare 'ladder' of the old tape list is not carried: 'curve ladder' is allowed in the brief.",
+  "sources_required": [
+   {
+    "label": "EIA (oil)",
+    "body_re": "\\bWTI\\b|\\bBrent\\b",
+    "sources_re": "\\bEIA\\b"
+   },
+   {
+    "label": "FX (Fed H.10 or FRED)",
+    "body_re": "broad dollar|EUR\\s*/\\s*USD|USD\\s*/\\s*JPY",
+    "sources_re": "H\\.10|FRED"
+   },
+   {
+    "label": "equities (FRED)",
+    "body_re": "S&P 500|Nasdaq Composite|\\bDow\\b",
+    "sources_re": "FRED"
+   },
+   {
+    "label": "mortgage rates (Freddie Mac)",
+    "body_re": "\\bmortgage\\b",
+    "sources_re": "Freddie Mac"
+   },
+   {
+    "label": "CPI/payrolls (BLS)",
+    "body_re": "\\bCPI\\b|payrolls|unemployment rate",
+    "sources_re": "\\bBLS\\b"
+   },
+   {
+    "label": "PCE/GDP (BEA)",
+    "body_re": "\\bPCE\\b|\\bGDP\\b",
+    "sources_re": "\\bBEA\\b"
+   },
+   {
+    "label": "Bankrate",
+    "body_re": "Bankrate",
+    "sources_re": "Bankrate"
+   },
+   {
+    "label": "Treasury curve",
+    "body_re": "\\b10-year\\b|\\b2-year\\b",
+    "sources_re": "Treasury"
+   },
+   {
+    "label": "NCUA figures",
+    "body_re": "credit union system|NCUA (?:reported|data)|NCUA's (?:quarterly|Q[1-4])",
+    "sources_re": "\\bNCUA\\b"
+   },
+   {
+    "label": "FDIC QBP figures",
+    "body_re": "Quarterly Banking Profile|\\bQBP\\b|FDIC reported",
+    "sources_re": "\\bFDIC\\b"
+   }
+  ],
+  "_note_sources_required": "13 Oct 2026 (check 'src'): a figure family that appears in the body must be named in the one Sources line (the last 'Sources:' on the page). News and regulatory items name their agency inline and are checked by 9d, not here. Found on the 13 Oct shadow run, whose footer omitted EIA and NCUA.",
+  "dateline_banned_re": [
+   "Market data as of"
+  ],
+  "_note_dateline": "13 Oct 2026 (check 'dateline'; RELEASE-QUEUE Q4): one market as-of over figures with other dates. The dateline names the Treasury curve's close; every other figure carries its own date.",
+  "fred_same_close_series": [
+   "SP500",
+   "NASDAQCOM",
+   "DJIA"
+  ],
+  "_note_fred": "13 Oct 2026 (check 'G2b'): every FRED figure in marketclose.json carries \"series\"; the run records each series' data-file header (fred.stlouisfed.org/data/<ID>.txt) under \"fred_headers\". Equity indexes print the curve's close; every other FRED series prints the last date in its header's Date Range.",
+  "also_apply": {
+   "retired": [
+    "release.banned_vocab_re",
+    "release.never_say_re",
+    "release.superseded_price_re"
+   ],
+   "advice": [
+    "release.shelf_b_re"
+   ]
+  }
+ },
+ "release": {
+  "real_institutions_literal": [
+   "VALT",
+   "Rogue",
+   "First Fed",
+   "Northwind",
+   "Darling",
+   "Taylor Advisors",
+   "Clearwire",
+   "Oak Harbor",
+   "Aspen Capital",
+   "Qolo",
+   "Sutton Bank",
+   "Commerce Bank of Washington"
+  ],
+  "retired_figures_re": [
+   "5\\.85\\s*%",
+   "8\\.9\\s*%",
+   "\\$?2\\.1\\s*B\\b",
+   "\\$?4\\.3\\s*B\\b",
+   "4\\.05\\s*%",
+   "\\$?1,462\\b",
+   "\\$?1,721\\b",
+   "\\$?1,841\\b"
+  ],
+  "banned_vocab_re": [
+   "\\bCD tower",
+   "\\bmaturity tower",
+   "\\brepricing tower"
+  ],
+  "verdict_re": [
+   "\\bRecommended:",
+   "\\bWe recommend\\b",
+   "\\bYou should\\b",
+   "\\brecommended zone\\b",
+   "\\bour recommendation is\\b"
+  ],
+  "shelf_b_re": [
+   "\\breinvestment packet\\b",
+   "\\bsecurities ladder\\b",
+   "\\bladder into\\b",
+   "\\bhedge overlay\\b",
+   "\\bduration positioning\\b",
+   "\\bsector .{0,20}positioning\\b",
+   "\\bextend duration\\b",
+   "\\bextend(?:s|ed|ing)\\s+duration\\b",
+   "\\bladder(?:s|ed|ing)?\\s+(?:maturities|CDs)\\b"
+  ],
+  "verb_re": [
+   "\\brecommend(?:s|ed|ing)?\\b",
+   "\\bshould (?:buy|sell|hold|reinvest|extend|shorten|replace|hedge|ladder)\\b",
+   "\\bappropriate securit(?:y|ies)\\b",
+   "\\boptimal\\b",
+   "\\bbest maturit(?:y|ies)\\b",
+   "\\btarget investment\\b",
+   "\\breinvest(?:s|ed|ing)?\\b",
+   "\\bhedge with\\b",
+   "\\bduration strateg(?:y|ies)\\b",
+   "\\b(?:extend|shorten|lengthen)(?:s|ed|ing)?\\b[^.\\n]{0,30}\\b(?:duration|maturit|the (?:book|ladder|portfolio)|term)",
+   "\\breplac(?:e|es|ed|ing)\\b[^.\\n]{0,30}\\b(?:securit|bond|holding|position|maturit|the ladder)"
+  ],
+  "absolute_re": [
+   "\\bat any point\\b",
+   "\\bno .{0,40}\\bwhatsoever\\b",
+   "\\bnever\\b",
+   "\\balways\\b",
+   "\\bzero\\b",
+   "\\bany marketing or demonstration\\b",
+   "\\bevery control\\b",
+   "\\bnothing (?:is |ever )?(?:leaves|uploaded|retained|stored)\\b",
+   "\\bno (?:customer|member|client) .{0,30}(?:data|information) (?:is|are)\\b"
+  ],
+  "provenance_re": [
+   "\\b20\\d\\d-\\d\\d-\\d\\d\\b",
+   "H\\.15 released",
+   "\\(full labels\\)",
+   "\\(per-class\\)",
+   "\\(verified\\)"
+  ],
+  "citations_re": [
+   "\\b\\d+\\s*U\\.S\\.C\\.",
+   "\\bRCW\\s*\\d+\\.\\d+",
+   "\\bWAC\\s*\\d+-\\d+",
+   "\\bFINRA Rule\\b",
+   "\\bRelease IA-\\d+",
+   "\\b§\\s?\\d+",
+   "\\bCFR\\b",
+   "\\bRegulation [A-Z]{1,3}\\b"
+  ],
+  "never_say_re": [
+   "\\$?100\\s*mm\\b[^.\\n]{0,60}(?:AUM|assets under management)",
+   "(?:AUM|assets under management)[^.\\n]{0,60}SEC registration is unavailable",
+   "nine content gates",
+   "(?:is |are )?not a model under SR",
+   "NCUA[- ](?:approved|certified|compliant|validated)",
+   "FFIEC[- ]approved",
+   "regulator[- ]approved",
+   "vendor cannot validate its own",
+   "cannot validate its own model",
+   "the maker never reviews their own work"
+  ],
+  "superseded_price_re": [
+   "\\$8k\\b",
+   "\\$8,000\\b",
+   "\\$2k\\s*[/–-]\\s*mo",
+   "\\$2,000\\s*/\\s*mo",
+   "ALCO-as-a-Service",
+   "\\$43,200\\b",
+   "\\$57,600\\b",
+   "\\$86,400\\b",
+   "\\bT[1-4]\\b\\s+(?:Desk|Governed|ALCO|Fractional)"
+  ]
+ },
+ "tape": {
+  "commentary_barred_from": [
+   "brief.retired_literal",
+   "brief.retired_re",
+   "brief.expect_literal",
+   "brief.advice_re",
+   "release.shelf_b_re",
+   "release.banned_vocab_re",
+   "release.never_say_re"
+  ],
+  "_note": "13 Oct 2026: the Desk tape's commentary is the Generic edition's own text, so its barred list is the brief's (plus the release gate's Shelf B, banned vocabulary and never-say lists), read from here by brief_tape_check.py and tools/marketclose-check.ts. Literal lists match as escaped text; every list matches case-insensitively."
+ }
+}

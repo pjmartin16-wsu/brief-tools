@@ -1,7 +1,7 @@
 name: checks
-# Runs on every push and pull request: the checker's self-test (seeded historic errors must FAIL,
-# the clean fixture must PASS) and the regression corpus (every archived sent edition must give
-# exactly its expected result). A red run means the pin in the brief prompt must not move to this commit.
+# Runs on every push and pull request: selftest_all.py (every checker's self-test, seeded historic errors must FAIL and
+# clean fixtures PASS; the regression corpus, where every archived sent edition must give exactly its expected result;
+# the Desk-tape check on the 13 Oct production tape; layoutaudit on its bad fixture), then the per-check tally. A red run means the pin in the brief prompt must not move to this commit.
 on:
   push:
   pull_request:
@@ -17,11 +17,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Self-test and regression corpus
-        run: python3 run_corpus.py
-      - name: Decision-list self-test (weekly audit, PM DECISION LIST)
-        run: python3 decision_list.py --self-test
-      - name: Tape checker compiles
-        run: python3 -m py_compile brief_tape_check.py
+      - name: Playwright and Chromium (layoutaudit, releasecheck HTML)
+        run: |
+          pip install playwright==1.48.0
+          python3 -m playwright install --with-deps chromium
+      - name: Every checker's self-test, the regression corpus and the tally (one command)
+        run: python3 selftest_all.py
+      - name: Per-check tally (real catches against false alarms)
+        run: python3 tally.py
       - name: Record hashes (compare with the pins in prompts/ and the task prompts)
-        run: sha256sum setnova_checks.py brief_tape_check.py prompts/*.md
+        run: sha256sum setnova_rules.json setnova_checks.py brief_tape_check.py releasecheck.py prompts/*.md

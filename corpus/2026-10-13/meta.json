@@ -1,0 +1,18 @@
+{
+ "today": "2026-10-13",
+ "full": {
+  "subject": "Setnova Advisory Treasury Full Desk Read — Tuesday, October 13, 2026 (Illustrative client demo)",
+  "sent": "Tue, 13 Oct 2026 10:05:28 +0000",
+  "gmail_id": "1a134b9686779c8f",
+  "subject_checked": "Setnova Advisory Treasury Full Desk Read — Tuesday, October 13, 2026 (Illustrative client demo)"
+ },
+ "generic": {
+  "subject": "Setnova Advisory Treasury Morning Brief — Tuesday, October 13, 2026",
+  "sent": "Tue, 13 Oct 2026 10:02:14 +0000",
+  "gmail_id": "1a134b67498a1abb",
+  "subject_checked": "Setnova Advisory Treasury Morning Brief — Tuesday, October 13, 2026"
+ },
+ "prompt": "prompts/PROMPT_LIVE.md at 2e4b4aa",
+ "marketclose_note": "marketclose.json here is NOT the run's own object: rebuilt on 13 Oct 2026 by the interactive session from Treasury's daily par yield table (Oct 2-9 rows) and the NY Fed API (SOFR, EFFR as of Oct 8; sofrai 30-day average effectiveDate Oct 9 = 3.81569), so 9a, G2a and G8 run.",
+ "bytes_note": "email HTML and plain text decoded from the Gmail RAW MIME of the sent message (policy.default), unchanged."
+}
