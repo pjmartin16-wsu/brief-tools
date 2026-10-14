@@ -54,6 +54,8 @@
  },
  "2026-10-13-shadow": {
   "fails": [
+   "auct/full",
+   "auct/generic",
    "dateline/full",
    "dateline/generic",
    "src/full",
@@ -62,7 +64,8 @@
   "why": {
    "dateline": "real defect: dateline 'Market data as of Oct 9 close' over figures carrying other dates (13 Oct Number Verifier HOLD; RELEASE-QUEUE Q4; check added 13 Oct)",
    "src": "real defect: Brent/WTI (EIA) and NCUA system figures printed; the Sources line names neither (13 Oct shadow review; RELEASE-QUEUE Q5)",
-   "note": "PROMPT_SLIM.md shadow run (subjects checked as the production subjects it would have used)"
+   "note": "PROMPT_SLIM.md shadow run (subjects checked as the production subjects it would have used)",
+   "auct": "real defect: '20-year bond reopening auction Wed Oct 21' printed with no schedule record behind it (source it or drop it); check added 14 Oct for RELEASE-QUEUE Q7, whose own case (5-year TIPS called a reopening, 14 Oct) is the seed"
   }
  }
 }

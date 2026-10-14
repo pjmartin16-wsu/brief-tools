@@ -57,3 +57,18 @@ It closes the one POLICY BREACH in the 10 Oct rule prune (a rule added with no t
 - **New checks (13 Oct):** `src` (the Sources line names every source family used), `dateline` (no single
   "Market data as of" over figures with other dates; RELEASE-QUEUE Q4) and `G2b` (every FRED figure is as fresh as
   FRED's own data file; FX had no check before).
+
+## 14 Oct 2026: the verifier becomes a gate; reopenings; false alarms scored as such
+
+- **`auct`** (RELEASE-QUEUE Q7): an auction is called a "reopening" only when marketclose.json records `"reopening": true`
+  for that security, taken from TreasuryDirect's tentative auction schedule ("R"). Seeded with the 14 Oct case, an
+  original-issue 5-year TIPS printed as a reopening (Number Verifier HOLD). The 13 Oct shadow edition now fails it too
+  (a 20-year reopening printed with no schedule record); EXPECTED.json says why.
+- **G8 window** (Q8): a rate's figure may not be read across another rate label. On 14 Oct the first pass read
+  "SOFR ... for Oct 9 · IORB 3.90%" as SOFR 3.90% (4 false alarms); a regression case keeps it out, and a new seed
+  proves a real SOFR mismatch is still caught.
+- **`tally.py`**: a first-pass count followed by `fp` ("G8 x4 fp") is scored as a false alarm, not a catch, and counts
+  toward CRYING WOLF. `corpus/FIRST-PASS.txt` now marks the 14 Oct line that way.
+- **`prompts/PROMPT_SLIM.md`** (PM decision A25, "Gate with one fix loop"): the Number Verifier runs in STEP 5e, BEFORE
+  any send. HOLD = one fix loop and a fresh second round; still HOLD = nothing sent and a "Setnova Brief HELD" email.
+  No verdict by 5:30 AM PT = sent unverified with a DEGRADED RUN alert (PM is the only recipient).

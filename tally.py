@@ -7,6 +7,8 @@ WHY. The quarterly rule prune used to re-read every edition to learn which check
   * PRE-SEND: what each check caught on the brief run's FIRST checker pass, before anything was sent, from the
     "Checker first-pass: exit N; G4c x4, 9a x1" lines the run puts in its same-morning check email. Those lines are
     kept, one per run, in corpus/FIRST-PASS.txt ("YYYY-MM-DD <tab> exit N; <hits or none>").
+    A count followed by "fp" ("G8 x4 fp") is a FALSE ALARM the run classed as such in STEP 5c(4): it is scored as a
+    false alarm, not a catch (14 Oct 2026, RELEASE-QUEUE Q8: the 14 Oct G8 x4 were false alarms and scored as catches).
 A check that keeps crying wolf, or that never fires anywhere, stands out before the quarterly pass.
 
     python3 tally.py                      # corpus + corpus/FIRST-PASS.txt
@@ -21,7 +23,7 @@ from collections import defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 CORPUS = os.path.join(HERE, "corpus")
 FP_LINE = re.compile(r"^(20\d\d-\d\d-\d\d)\S*\s+(?:Checker first-pass:\s*)?exit\s+(\d)\s*;\s*(.*)$")
-HIT = re.compile(r"([0-9A-Za-z]+)\s*[x×]\s*(\d+)")
+HIT = re.compile(r"([0-9A-Za-z]+)\s*[x×]\s*(\d+)(\s*\(?(?:fp|false alarms?|false positives?)\)?)?", re.I)
 
 
 def check_ids():
@@ -43,7 +45,11 @@ def read_first_pass(paths):
             if not m:
                 bad.append(f"{os.path.basename(p)}:{n}: {line[:80]}")
                 continue
-            hits = {} if m.group(3).strip().lower() in ("none", "") else {k: int(v) for k, v in HIT.findall(m.group(3))}
+            hits = {}
+            if m.group(3).strip().lower() not in ("none", ""):
+                for k, v, fp in HIT.findall(m.group(3)):
+                    key = (k, "fp") if fp.strip() else k
+                    hits[key] = hits.get(key, 0) + int(v)
             runs.append((m.group(1), int(m.group(2)), hits))
     return runs, bad
 
@@ -59,42 +65,49 @@ def tally(expected, runs, ids):
             row["escape_real" if w.startswith("real defect") else "escape_fp" if w.startswith("false positive") else "escape_unlabelled"] += 1
     for day, code, hits in runs:
         for cid, n in hits.items():
-            t.setdefault(cid, defaultdict(int))["presend"] += n
+            if isinstance(cid, tuple):
+                t.setdefault(cid[0], defaultdict(int))["presend_fp"] += n
+            else:
+                t.setdefault(cid, defaultdict(int))["presend"] += n
     out = []
     for cid, r in t.items():
-        fired = r["escape_real"] + r["escape_fp"] + r["escape_unlabelled"] + r["presend"]
+        fired = r["escape_real"] + r["escape_fp"] + r["escape_unlabelled"] + r["presend"] + r["presend_fp"]
+        wolf, real = r["escape_fp"] + r["presend_fp"], r["escape_real"] + r["presend"]
         flag = ""
-        if r["escape_fp"] >= 2 and r["escape_fp"] > r["escape_real"]:
+        if wolf >= 2 and wolf > real:
             flag = "CRYING WOLF"
         elif r["escape_unlabelled"]:
             flag = "LABEL IT (EXPECTED.json why)"
         elif fired == 0:
             flag = "silent (prune: KEEP-SAFETY or RETIRE?)"
-        out.append({"check": cid, "presend": r["presend"], "escape_real": r["escape_real"], "escape_fp": r["escape_fp"],
+        out.append({"check": cid, "presend": r["presend"], "presend_fp": r["presend_fp"], "escape_real": r["escape_real"], "escape_fp": r["escape_fp"],
                     "escape_unlabelled": r["escape_unlabelled"], "flag": flag})
     return out
 
 
 def render(rows, ndays, nruns):
     lines = [f"TALLY over {ndays} archived sent-edition day(s) and {nruns} first-pass run line(s)",
-             f"{'check':9} {'pre-send':>8} {'escape real':>11} {'escape fp':>9}  flag"]
+             f"{'check':9} {'pre-send':>8} {'pre-send fp':>11} {'escape real':>11} {'escape fp':>9}  flag"]
     for r in sorted(rows, key=lambda r: r["check"]):
-        lines.append(f"{r['check']:9} {r['presend']:8} {r['escape_real']:11} {r['escape_fp'] + r['escape_unlabelled']:9}  {r['flag']}")
+        lines.append(f"{r['check']:9} {r['presend']:8} {r['presend_fp']:11} {r['escape_real']:11} {r['escape_fp'] + r['escape_unlabelled']:9}  {r['flag']}")
     return "\n".join(lines)
 
 
 def self_test():
-    ids = ["9a", "G4c", "src", "brand"]
+    ids = ["9a", "G4c", "src", "brand", "G8"]
     exp = {"d1": {"fails": ["src/full", "src/generic", "brand/full"], "why": {"src": "real defect: x", "brand": "false positive: y"}},
            "d2": {"fails": ["brand/generic"], "why": {"brand": "false positive: z"}},
            "d3": {"fails": ["9a/full"], "why": {}}}
     with tempfile.TemporaryDirectory() as d:
         f = os.path.join(d, "fp.txt")
-        open(f, "w").write("# comment\n2026-10-13\texit 1; G4c×4, 9a x1\n2026-10-14  Checker first-pass: exit 0; none\nnot a line\n")
+        open(f, "w").write("# comment\n2026-10-13\texit 1; G4c×4, 9a x1\n2026-10-14  Checker first-pass: exit 0; none\nnot a line\n"
+                           "2026-10-15\texit 1; G8 x4 fp, 9a x1\n")
         runs, bad = read_first_pass([f])
     rows = {r["check"]: r for r in tally(exp, runs, ids)}
-    want = [(len(runs) == 2, "two first-pass lines read"), (len(bad) == 1, "the malformed line reported, not skipped"),
-            (rows["G4c"]["presend"] == 4, "G4c x4 counted"), (rows["9a"]["presend"] == 1, "'x1' counted"),
+    want = [(len(runs) == 3, "three first-pass lines read"), (len(bad) == 1, "the malformed line reported, not skipped"),
+            (rows["G4c"]["presend"] == 4, "G4c x4 counted"), (rows["9a"]["presend"] == 2, "'x1' counted on both lines"),
+            (rows["G8"]["presend"] == 0 and rows["G8"]["presend_fp"] == 4, "'G8 x4 fp' scored as 4 false alarms, not catches (Q8)"),
+            (rows["G8"]["flag"] == "CRYING WOLF", "pre-send false alarms with no real catch flagged"),
             (rows["src"]["escape_real"] == 2, "real escapes counted per edition"),
             (rows["brand"]["flag"] == "CRYING WOLF", "two false positives over no real catch flagged"),
             (rows["9a"]["flag"].startswith("LABEL"), "an unlabelled escape asks for a label")]

@@ -191,6 +191,13 @@ class MC:
                 elif key == "sofr" and self.sofr_asof is None:
                     self.sofr_asof = o["asOf"][:10]
 
+        # auct (14 Oct 2026, RELEASE-QUEUE Q7): Treasury auctions carrying the schedule's "reopening": true|false flag.
+        self.auctions = []
+        for p, o in _walk(obj):
+            if isinstance(o, dict) and isinstance(o.get("reopening"), bool):
+                sec = " ".join(str(o.get(k, "")) for k in ("security", "tenor", "name", "t", "it", "title") if o.get(k))
+                self.auctions.append((sec, o["reopening"], str(o.get("date") or o.get("d") or o.get("asOf") or "")))
+
         # G2b (13 Oct 2026): FRED figures ("series" key, or a FRED/H.10 source) and the data-file headers the run read.
         self.fred_figs, self.fred_headers = [], {}
         for p, o in _walk(obj):
@@ -675,6 +682,45 @@ def chk_fred(mc):
     return out
 
 
+REOPEN_SEC = re.compile(r"(\d+)-(week|month|year)(?:\s+(TIPS|FRN|bond|note|bill)s?)?", re.I)
+REOPEN_TXT = re.compile(r"(\d+)-(week|month|year)(?:\s+(TIPS|FRN|bond|note|bill)s?)?\s+(?:auction\s+)?\(?reopen(?:ing|ed)\b", re.I)
+
+
+def _sec_key(m):
+    typ = (m.group(3) or "").upper().rstrip("S")
+    return int(m.group(1)), m.group(2).lower(), {"BOND": "", "NOTE": "", "BILL": ""}.get(typ, typ)
+
+
+def chk_auction_reopening(ed, mc, today):
+    """auct (14 Oct 2026, RELEASE-QUEUE Q7): an auction is called a "reopening" only when marketclose.json records
+    "reopening": true for that security from TreasuryDirect's schedule (marked "R"). 14 Oct: "5-year TIPS reopening
+    auction Thu Oct 22" printed for an original issue (the schedule marks it "T"); Number Verifier HOLD."""
+    if mc is None:
+        return None
+    recs = []
+    for sec, flag, d in mc.auctions:
+        m = REOPEN_SEC.search(sec)
+        if m:
+            recs.append((_sec_key(m), flag, sec))
+    out = []
+    for k, t in ed.vis.items():
+        named = set()
+        for m in REOPEN_TXT.finditer(t):
+            named.add(m.start())
+            key = _sec_key(m)
+            same = [r for r in recs if r[0] == key or (not key[2] and r[0][:2] == key[:2] and r[0][2] not in ("TIPS", "FRN"))]
+            if not mc.auctions:
+                out.append(f"[{k}] 'reopening' printed but marketclose.json records no auction with a \"reopening\" flag: {ctx(t, m.start(), m.end(), 30)}")
+            elif not same:
+                out.append(f"[{k}] '{m.group(0)}': no auction record for that security in marketclose.json: {ctx(t, m.start(), m.end(), 30)}")
+            elif not any(r[1] for r in same):
+                out.append(f"[{k}] '{m.group(0)}': the schedule record ({same[0][2]}) is an original issue, not a reopening: {ctx(t, m.start(), m.end(), 30)}")
+        for m in re.finditer(r"\breopen(?:ing|ed)\b", t, re.I):
+            if not any(s <= m.start() <= s + 60 for s in named):
+                out.append(f"[{k}] 'reopening' printed without a named security (\"5-year TIPS\"): {ctx(t, m.start(), m.end(), 40)}")
+    return out
+
+
 CHECKS = [
     ("5b5", "email hygiene and contrast", chk_email_hygiene),
     ("5b6", "provenance leak", chk_provenance),
@@ -696,7 +742,11 @@ CHECKS = [
     ("brand", "Setnova Advisory branding only", chk_brand),
     ("src", "Sources line names every source used", chk_sources),
     ("dateline", "no single market as-of over mixed dates", chk_dateline),
+    ("auct", "an auction is a reopening only if the schedule says so", chk_auction_reopening),
 ]
+
+
+G8_GAP = r"(?:(?!EFFR|SOFR|IORB|ON RRP|\bRRP\b|discount|effective|fed(?:eral)? funds|target|prime)[^%\n]){0,25}?"
 
 
 def chk_g8(eds, mc):
@@ -714,7 +764,9 @@ def chk_g8(eds, mc):
                     out.append(f"[{ed.name}/{k}] curve {ten} {v:.2f}% not printed")
             for lab, rx in (("EFFR", r"EFFR|effective (?:federal )?funds rate"), ("SOFR", r"(?<!average )(?<!avg )(?<!day )\bSOFR\b(?! 30)(?!\s+(?:average|avg))"), ("IORB", r"\bIORB\b")):
                 if lab in mc.rates:
-                    for m in re.finditer(r"(?:" + rx + r")[^%\n]{0,25}?(\d+\.\d\d)%", t, re.I):
+                    # 14 Oct 2026 (RELEASE-QUEUE Q8): the figure must belong to this label, so the gap may not cross another
+                    # rate label. The first pass read "SOFR ... for Oct 9 · IORB 3.90%" as SOFR 3.90% (4 false alarms).
+                    for m in re.finditer(r"(?:" + rx + r")" + G8_GAP + r"(\d+\.\d\d)%", t, re.I):
                         if abs(float(m.group(1)) - mc.rates[lab]) > 0.005:
                             out.append(f"[{ed.name}/{k}] {lab} printed {m.group(1)}%, object {mc.rates[lab]:.2f}%")
     return out
@@ -779,6 +831,8 @@ MC_FIX = {
     "equities": {"sp500": {"value": 7765.36, "source": "FRED SP500", "asOf": "2026-10-08", "series": "SP500"}},
     "fred_headers": {"DEXUSEU": {"last_updated": "2026-10-05 3:16 PM CDT", "range_end": "2026-10-02"},
                      "SP500": {"last_updated": "2026-10-08 7:01 PM CDT", "range_end": "2026-10-08"}},
+    "auctions": [{"security": "20-year bond", "date": "2026-10-21", "reopening": True, "source": "treasurydirect.gov tentative auction schedule"},
+                 {"security": "5-year TIPS", "date": "2026-10-22", "reopening": False, "source": "treasurydirect.gov tentative auction schedule"}],
     "news": [{"date": "2026-08-25", "title": "FDIC Quarterly Banking Profile Q2 2026", "source": "fdic.gov"}],
     "reg": [{"date": "2026-08-12", "agency": "OCC/FDIC", "title": "CRA proposal", "source": "federalregister.gov"}],
 }
@@ -793,7 +847,8 @@ CMN = ("<p>Friday, October 9, 2026 \u00b7 Treasury curve as of Oct 8 close \u00b
        "<p>The long end rallied on the day (the 10-year 6 bp below October 7, the 30-year 7 bp lower at 5.60%) and the curve was little changed on the week. "
        "Freddie Mac's survey put the 30-year fixed at 7.40% and the 15-year at 6.73%, both up from the prior week (7.28% / 6.60%).</p>"
        "<p>The 30-year fell 7 bp from October 7. The 2s10s slope steepened 15 bp to +41 bp since September 30. The top 1-year CD APY on Bankrate's list was 4.45%. "
-       "The FDIC increased its staffing for bank examinations. WED 14: Personal Income &amp; Outlays, August 2026 \u00b7 8:30 ET.</p>")
+       "The FDIC increased its staffing for bank examinations. WED 14: Personal Income &amp; Outlays, August 2026 \u00b7 8:30 ET.</p>"
+       "<p>Ahead: 20-year bond reopening auction Wed Oct 21; 5-year TIPS auction Thu Oct 22.</p>")
 FULL_BODY = ("<p>NIM 3.32% (7 consecutive quarterly increases) \u00b7 Cost of deposits 1.92% (beta 34% vs 45% modeled) \u00b7 AOCI \u2212$41.4M (up $4.6M over three months, less negative) \u00b7 "
              "Loans / deposits 85.1% ($1,910M / $2,245M) \u00b7 Avail. liquidity $1,017M (37.0% of assets) \u00b7 Uninsured 27% (1.7\u00d7 covered) \u00b7 Tier 1 leverage ratio 9.6% (vs 8.5% internal floor) \u00b7 EVE +300 \u221214.6% (watch \u221213.75% / limit \u221225%)</p>"
              "<p>Each 25 bp between that book yield and whatever it earns next is on the order of $313k a year, gross, full-year, full deployment ($125M \u00d7 0.25%). "
@@ -861,6 +916,10 @@ SEEDS = [
     ("src", "generic", "email_html", "</p><p>EFFR", " WTI spot $96.24 (Oct 6).</p><p>EFFR", "13 Oct shadow: oil printed, EIA not in the Sources line"),
     ("src", "full", "text", "The FDIC increased", "NCUA reported assets of $2.50 trillion. The FDIC increased", "13 Oct shadow: NCUA figures, NCUA not in the Sources line"),
     ("dateline", "generic", "email_html", "Treasury curve as of Oct 8 close", "Market data as of Oct 8 close", "13 Oct Number Verifier HOLD: one as-of over mixed dates (Q4)"),
+    # 14 Oct 2026: RELEASE-QUEUE Q7 and Q8.
+    ("auct", "generic", "text", "5-year TIPS auction", "5-year TIPS reopening auction", "14 Oct Number Verifier HOLD: original-issue TIPS called a reopening (Q7)"),
+    ("auct", "full", "email_html", "5-year TIPS auction Thu Oct 22.", "5-year TIPS auction Thu Oct 22; the 10-year reopening follows.", "reopening with no schedule record for that security"),
+    ("G8", "generic", "email_html", "SOFR 3.88% \u00b7 IORB", "SOFR 3.91% \u00b7 IORB", "SOFR printed off the object (still caught after the Q8 tightening)"),
 ]
 
 # (why, mutation of a deep copy of MC_FIX) for the object-level G2b check
@@ -871,6 +930,12 @@ MC_SEEDS = [
     ("FRED figure with no series id", lambda m: m["fx"]["eur_usd"].pop("series")),
     ("equity close not the curve's close", lambda m: m["equities"]["sp500"].update(asOf="2026-10-07")),
     ("9 Oct: a date FRED does not have yet", lambda m: m["fx"]["eur_usd"].update(asOf="2026-10-05")),
+]
+
+# (check id, why, mutation of a deep copy of MC_FIX): an edition check that must FAIL once the object changes
+MC_ED_SEEDS = [
+    ("auct", "14 Oct: 'reopening' printed with no schedule flag recorded in marketclose.json", lambda m: m.pop("auctions")),
+    ("auct", "the schedule record says original issue", lambda m: m["auctions"][0].update(reopening=False)),
 ]
 
 
@@ -907,6 +972,24 @@ def self_test():
         hit = [r for r in rs if r["check"] == "G2b" and r["status"] == "FAIL"]
         print(f"  {'caught' if hit else 'MISSED'}  G2b   {why}")
         ok &= bool(hit)
+    for cid, why, mut in MC_ED_SEEDS:
+        m2 = copy.deepcopy(MC_FIX)
+        mut(m2)
+        rs = run([Ed(n, **pp) for n, pp in _fixture().items()], MC(m2), "2026-10-09")
+        hit = [r for r in rs if r["check"] == cid and r["status"] == "FAIL"]
+        print(f"  {'caught' if hit else 'MISSED'}  {cid:5} {why}")
+        ok &= bool(hit)
+    # Regression (14 Oct 2026, Q8): a grid note naming SOFR and EFFR's date, then IORB, is not a SOFR or EFFR figure.
+    note = CMN.replace("<p>EFFR 3.88% \u00b7 SOFR 3.88% \u00b7 IORB 3.90%</p>",
+                       "<p>EFFR 3.88% \u00b7 SOFR 3.88% \u00b7 IORB 3.90%</p><p>SOFR and EFFR for Oct 7 \u00b7 IORB 3.90% per the FOMC note.</p>")
+    q8 = [Ed("full", email_html=_email(note + FULL_BODY, "FULL DESK READ")), Ed("generic", email_html=_email(note, "DESK READ"))]
+    g8 = [r for r in run(q8, mc, "2026-10-09") if r["check"] == "G8" and r["status"] == "FAIL"]
+    if g8:
+        ok = False
+        print("REGRESSION 14 Oct G8 window FAILED:")
+        print(report(g8, [])[0])
+    else:
+        print("  regression 14 Oct 'SOFR ... for Oct 9 · IORB 3.90%' grid note: no G8 false positive")
     # Regression (8 Oct 2026): email-only editions whose HTML ladder prints bare numbers, plus a 30-day SOFR average.
     lad = "<table><tr>" + "".join(f"<td>{t}</td>" for t in ("3M", "6M", "1Y", "2Y", "5Y", "10Y", "30Y")) + "</tr><tr>" + \
           "".join(f"<td>{v}</td>" for v in ("4.23", "4.30", "4.44", "4.75", "4.99", "5.22", "5.60")) + "</tr></table>"
