@@ -89,3 +89,8 @@ It closes the one POLICY BREACH in the 10 Oct rule prune (a rule added with no t
 - **`prompts/PROMPT_SLIM.md`**: G6a gains the one-event-per-row rule; STEP 5c gains (3a), the `--week` run; STEP 6c's
   `week[]` comes from that file; the pinned SHA-256 of `brief_tape_check.py` moves. `prompts/PROMPT_LIVE.md` is not
   loaded since D2 (13 Oct) and keeps the old pin unchanged.
+- **Tightened after a fresh-context review the same evening:** `t` is required (a string, `""` allowed); hours 1-12 and
+  minutes 00-59; a bare hour only from 8 to 12 or 1 to 6 (a bare 7 is ambiguous, so 7:00 and other off-hours times
+  say "a.m." or "p.m."); `" + "` outside parentheses counts as a join ("PMIs (mfg + services)" stays legal; "GDP+PCE"
+  with no spaces is not caught, accepted); ASCII digits only and no trailing newline in `t`, so the Python and
+  TypeScript engines agree on every reviewed input. `--week` exits 2 on an input or usage error. 14 seeds in all.

@@ -53,6 +53,15 @@ Q6_SEEDS = [
     ("same-day rows out of time order", lambda w: w.insert(3, w.pop(4)), "order same-day rows by time"),
     ("a day that reappears", lambda w: w.append({"d": "WED 14", "it": "17-week bill auction", "t": ""}), "must be adjacent"),
     ("a time not in H:MM ET form", lambda w: w[5].__setitem__("t", "8.30am"), "is not 'H:MM ET'"),
+    # Review of 14 Oct (fresh context): the cases below each slipped past, or split the two engines, before the fix.
+    ("a bare 7:00 (a.m. or p.m.?)", lambda w: w.insert(5, {"d": "WED 14", "it": "Evening remarks", "t": "7:00 ET"}), "is not 'H:MM ET'"),
+    ("an impossible time", lambda w: w[5].__setitem__("t", "99:99 ET"), "is not 'H:MM ET'"),
+    ("a fullwidth digit in t", lambda w: w[5].__setitem__("t", "\uff18:30 ET"), "is not 'H:MM ET'"),
+    ("a trailing newline in t", lambda w: w[5].__setitem__("t", "8:30 ET\n"), "is not 'H:MM ET'"),
+    ("a clock time after a non-ASCII letter", lambda w: w[5].__setitem__("it", "\u00e912:30 remarks"), "time goes in t only"),
+    ("a row with no t", lambda w: w[5].pop("t"), "needs t"),
+    ("' + ' joining two events", lambda w: w[3].__setitem__("it", "September CPI + Real Earnings"), "one event per row"),
+    ("' + ' between no-break spaces", lambda w: w[3].__setitem__("it", "September CPI\u00a0+\u00a0Real Earnings"), "one event per row"),
 ]
 
 

@@ -3,7 +3,8 @@ The Morning Brief run has no copy of the Desk, so it runs this (standard library
 It mirrors src/schema/market.ts and tools/marketclose-check.ts; tests/engine/bridge.test.ts runs both on the same
 files and requires the same verdict. Both read the barred wording from setnova_rules.json (13 Oct 2026), and both refuse
 unknown top-level keys (the Desk ignored them until 13 Oct), and both hold the calendar to one event per row (14 Oct, Q6). Usage: python3 brief_tape_check.py marketclose_desk.json  -> exit 0 = PASS.
-       python3 brief_tape_check.py --week rows.json         -> the calendar rows alone, before rendering (STEP 5c)."""
+       python3 brief_tape_check.py --week rows.json         -> the calendar rows alone, before rendering (STEP 5c);
+       exit 0 = WEEK PASS, 1 = WEEK FAIL, 2 = input error."""
 import hashlib, json, os, re, sys
 
 RATE_IDS = {"ff", "effr", "sofr", "t2", "t5", "t10", "s210", "t30", "mtg30", "fhlb3", "cd12", "hysa"}
@@ -32,15 +33,23 @@ def barred_patterns(path=RULES_FILE, want=RULES_SHA256):
 # row also carried times inside the text, out of order. Each row now holds ONE event, its time only in "t" (from that
 # event's own source, "" when the source gives none), same-day rows adjacent and in time order. A note on the same
 # event goes in parentheses or after a comma, never after ";" or "·".
-EVENT_JOIN = re.compile(r"\s*[;|\u00b7]\s*")
-CLOCK_IN_TEXT = re.compile(r"\b\d{1,2}:\d{2}\b")
-T_FORMAT = re.compile(r"^(\d{1,2}):(\d{2})(?: ([ap])\.m\.)? ET$")
+EVENT_JOIN = re.compile(r"\s*[;|\u00b7]\s*", re.ASCII)
+PLUS_JOIN = re.compile(r"\s\+\s")  # Unicode \s, like JavaScript's            # "GDP + PCE"; a "+" inside parentheses ("PMIs (mfg + services)") is allowed
+PARENS = re.compile(r"\([^()]*\)")
+CLOCK_IN_TEXT = re.compile(r"\b\d{1,2}:\d{2}\b", re.ASCII)
+# Hours 1-12, minutes 00-59. A bare hour is allowed only from 8 to 12 (morning data, noon) and 1 to 6 (p.m.: auction
+# closes, the Beige Book); 7 and anything outside a day's market hours must say "a.m." or "p.m." (review, 14 Oct).
+T_FORMAT = re.compile(r"(1[0-2]|[1-9]):([0-5][0-9])(?: ([ap])\.m\.)? ET", re.ASCII)
+
+
+def t_ok(t):
+    m = T_FORMAT.fullmatch(t)
+    return bool(m) and (m.group(3) is not None or int(m.group(1)) in (8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6))
 
 
 def et_minutes(t):
-    """Minutes after midnight ET for a week[] time. A bare H:MM with H from 1 to 6 is p.m. (auction closes, the
-    Beige Book): the calendar carries no 1-6 a.m. event without writing "a.m."."""
-    m = T_FORMAT.match(t)
+    """Minutes after midnight ET for a week[] time that passed t_ok(). A bare 1-6 is p.m.; a bare 8-12 is a.m. (12 noon)."""
+    m = T_FORMAT.fullmatch(t)
     h, mi, ap = int(m.group(1)), int(m.group(2)), m.group(3)
     if ap == "a": h = 0 if h == 12 else h
     elif ap == "p": h = h if h == 12 else h + 12
@@ -51,16 +60,20 @@ def et_minutes(t):
 def week_errors(week):
     e, seen, prev = [], [], None
     for i, w in enumerate(week):
-        if not (isinstance(w, dict) and isinstance(w.get("it"), str) and isinstance(w.get("d"), str) and isinstance(w.get("t", ""), str)):
+        if not (isinstance(w, dict) and isinstance(w.get("it"), str) and isinstance(w.get("d"), str)):
             continue
-        it, d, t = w["it"], w["d"], w.get("t", "")
-        if EVENT_JOIN.search(it): e.append(f"week[{i}] joins more than one event (';', '|' or a middle dot): one event per row")
+        if not isinstance(w.get("t"), str):
+            e.append(f"week[{i}] needs t (a string; \"\" when the source gives no time)"); continue
+        it, d, t = w["it"], w["d"], w["t"]
+        if EVENT_JOIN.search(it) or PLUS_JOIN.search(PARENS.sub("", it)):
+            e.append(f"week[{i}] joins more than one event (';', '|', a middle dot or ' + '): one event per row")
         if CLOCK_IN_TEXT.search(it): e.append(f"week[{i}] carries a time inside the event text: the time goes in t only")
-        if t and not T_FORMAT.match(t): e.append(f"week[{i}].t {t!r} is not 'H:MM ET', 'H:MM a.m. ET' or 'H:MM p.m. ET'")
+        if t and not t_ok(t):
+            e.append(f"week[{i}].t {t!r} is not 'H:MM ET' (bare hour 8-12 or 1-6 only), 'H:MM a.m. ET' or 'H:MM p.m. ET'")
         if d != (seen[-1] if seen else None):
             if d in seen: e.append(f"week[{i}] {d!r} reappears after another day: same-day rows must be adjacent")
             seen.append(d); prev = None
-        if t and T_FORMAT.match(t):
+        if t and t_ok(t):
             now = et_minutes(t)
             if prev is not None and now < prev: e.append(f"week[{i}] {d} {t} comes after a later time the same day: order same-day rows by time")
             prev = now
@@ -118,7 +131,7 @@ def check(t):
         if not isinstance(v, list): e.append(f"{k} must be a list"); continue
         for i, it in enumerate(v):
             if not (isinstance(it, dict) and all(ne(it.get(x)) for x in need)): e.append(f"{k}[{i}] needs {', '.join(need)}")
-            elif k == "week" and ("t" in it and not isinstance(it["t"], str) or "mq" in it and not isinstance(it["mq"], bool)): e.append(f"week[{i}] t/mq types")
+            elif k == "week" and "mq" in it and not isinstance(it["mq"], bool): e.append(f"week[{i}].mq must be true/false")
     if isinstance(t.get("week"), list): e += week_errors(t["week"])
     co = t.get("commentary")
     if co is not None:
@@ -145,9 +158,9 @@ def week_main(path):
     try:
         rows = json.load(open(path, encoding="utf-8"))
     except Exception as x:
-        print(f"WEEK FAIL: not JSON: {x}"); return 1
+        print(f"WEEK INPUT ERROR: not JSON: {x}"); return 2
     if not (isinstance(rows, list) and rows and all(isinstance(w, dict) and all(isinstance(w.get(k), str) and w.get(k) for k in ("d", "it")) for w in rows)):
-        print('WEEK FAIL: expected a non-empty list of {"d","it","t"} rows'); return 1
+        print('WEEK INPUT ERROR: expected a non-empty list of {"d","it","t"} rows'); return 2
     errs = week_errors(rows)
     if errs:
         print("WEEK FAIL:\n  " + "\n  ".join(errs)); return 1
@@ -155,7 +168,9 @@ def week_main(path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3 and sys.argv[1] == "--week":
+    if len(sys.argv) > 1 and sys.argv[1] == "--week":
+        if len(sys.argv) != 3:
+            print("usage: python3 brief_tape_check.py --week rows.json"); sys.exit(2)
         sys.exit(week_main(sys.argv[2]))
     try:
         tape = json.load(open(sys.argv[1], encoding="utf-8"))
