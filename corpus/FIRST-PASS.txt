@@ -3,3 +3,4 @@
 # Format: YYYY-MM-DD<tab>exit N; <check id x hits, comma-separated, or none>
 # PROMPT_LIVE.md runs do not print the line (only PROMPT_SLIM.md does); their first pass is not recorded here.
 2026-10-13-shadow	exit 0; none
+2026-10-14	exit 1; G8 x4
