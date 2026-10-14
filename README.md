@@ -72,3 +72,20 @@ It closes the one POLICY BREACH in the 10 Oct rule prune (a rule added with no t
 - **`prompts/PROMPT_SLIM.md`** (PM decision A25, "Gate with one fix loop"): the Number Verifier runs in STEP 5e, BEFORE
   any send. HOLD = one fix loop and a fresh second round; still HOLD = nothing sent and a "Setnova Brief HELD" email.
   No verdict by 5:30 AM PT = sent unverified with a DEGRADED RUN alert (PM is the only recipient).
+
+## 14 Oct 2026 (evening): one event per calendar row (RELEASE-QUEUE Q6)
+
+- **`brief_tape_check.py`**: `week[]` rows hold ONE event. No `;`, `|` or `·` joining events, no clock time inside the
+  event text (the time goes in `t`, from that event's own source, `""` when it has none), `t` in `H:MM ET` /
+  `H:MM a.m. ET` / `H:MM p.m. ET` form, same-day rows adjacent and in time order. On 13 and 14 Oct the tape (and both
+  editions) printed "September PPI; 4- and 8-week bill auctions 8:30 ET", one time read as both events'.
+  New `--week rows.json` mode checks the calendar rows alone, so the brief run catches a joined row in STEP 5c(3a),
+  BEFORE rendering, instead of on the tape after the send.
+- **Tests:** the real 13 Oct production tape now FAILS (it is the case that motivated the rule); the same tape split one
+  event per row PASSES; six seeds (two events under one time from the 14 Oct rows, a middle dot, a time in the text,
+  same-day rows out of order, a day that reappears, a malformed time) each FAIL, and each PASSED the previous code.
+  `selftest_all.py` runs them. The Desk's `tools/marketclose-check.ts` mirrors the rule (`weekErrors`), and
+  `tests/engine/bridge.test.ts` requires both engines to agree on all of these cases.
+- **`prompts/PROMPT_SLIM.md`**: G6a gains the one-event-per-row rule; STEP 5c gains (3a), the `--week` run; STEP 6c's
+  `week[]` comes from that file; the pinned SHA-256 of `brief_tape_check.py` moves. `prompts/PROMPT_LIVE.md` is not
+  loaded since D2 (13 Oct) and keeps the old pin unchanged.

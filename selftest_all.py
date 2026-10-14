@@ -5,7 +5,8 @@ Runs, in order, and prints one line each:
   setnova_checks.py --self-test        Morning Brief gate (seeded historic errors must FAIL, clean fixture PASS)
   run_corpus.py                        every archived sent edition gives exactly its expected result
   tally.py --self-test                 per-check score (#7)
-  brief_tape_check.py                  the 13 Oct production Desk tape PASSes; a tape with a barred phrase FAILs
+  brief_tape_check.py                  the 13 Oct production Desk tape FAILs one-event-per-row (Q6) and PASSes once split;
+                                       a barred phrase and six calendar seeds FAIL
   decision_list.py --self-test         the weekly audit's PM decision list
   releasecheck.py --self-test          the outbound-document gate (15 content checks, 25 verb-gate patterns)
   claims_review_by.py --self-test      review-by dates on CLAIMS.md and the terms file
@@ -29,17 +30,64 @@ def last(out):
     return out.splitlines()[-1] if out else ""
 
 
+# The 13 Oct production tape's calendar split one event per row (RELEASE-QUEUE Q6, 14 Oct 2026): the same events,
+# times moved out of the text into t, same-day rows in time order. The production bytes themselves now FAIL.
+Q6_WEEK = [
+    {"d": "MON 12", "it": "Columbus Day federal holiday (no Treasury curve published)", "t": ""},
+    {"d": "TUE 13", "it": "Gov. Waller discussion on AI, Bloomberg New Economy Forum", "t": "3:45 a.m. ET"},
+    {"d": "WED 14", "it": "VCS Bowman discussion", "t": "5:40 a.m. ET"},
+    {"d": "WED 14", "it": "September CPI and Real Earnings", "t": "8:30 ET", "mq": True},
+    {"d": "WED 14", "it": "Beige Book", "t": "2:00 p.m. ET"},
+    {"d": "THU 15", "it": "September PPI", "t": "8:30 ET"},
+    {"d": "THU 15", "it": "Chairman Warsh fireside chat with IMF MD Georgieva", "t": "11:30 p.m. ET"},
+    {"d": "FRI 16", "it": "September import and export prices", "t": "8:30 ET"},
+    {"d": "FRI 16", "it": "industrial production (G.17)", "t": "9:15 ET"},
+]
+# Each seed must FAIL the tape check with the quoted words in its output.
+Q6_SEEDS = [
+    ("14 Oct production rows: two events under one time", lambda w: w.__setitem__(slice(None), [
+        {"d": "WED 14", "it": "Beige Book; 17-week bill auction", "t": "2:00 ET"},
+        {"d": "THU 15", "it": "September PPI; 4- and 8-week bill auctions", "t": "8:30 ET"}]), "one event per row"),
+    ("a middle dot joining two events", lambda w: w[5].__setitem__("it", "September PPI \u00b7 jobless claims"), "one event per row"),
+    ("a time inside the event text", lambda w: w[4].__setitem__("it", "Beige Book 2:00 p.m. ET"), "time goes in t only"),
+    ("same-day rows out of time order", lambda w: w.insert(3, w.pop(4)), "order same-day rows by time"),
+    ("a day that reappears", lambda w: w.append({"d": "WED 14", "it": "17-week bill auction", "t": ""}), "must be adjacent"),
+    ("a time not in H:MM ET form", lambda w: w[5].__setitem__("t", "8.30am"), "is not 'H:MM ET'"),
+]
+
+
 def tape_case():
     good = os.path.join(HERE, "test", "marketclose_desk_2026-10-13_production.json")
-    c1, o1 = run(["brief_tape_check.py", good])
-    t = json.load(open(good, encoding="utf-8"))
-    t["commentary"]["read"].append("Banks should lock in term funding now.")
-    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
-        json.dump(t, f)
-    c2, o2 = run(["brief_tape_check.py", f.name])
-    os.unlink(f.name)
-    ok = c1 == 0 and c2 == 1 and "barred" in o2
-    return ok, f"production tape: {last(o1)}; seeded barred phrase: {'FAIL as required' if c2 == 1 else last(o2)}"
+    prod = json.load(open(good, encoding="utf-8"))
+
+    def check(t):
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
+            json.dump(t, f)
+        c, o = run(["brief_tape_check.py", f.name])
+        os.unlink(f.name)
+        return c, o
+
+    c0, o0 = check(prod)
+    fixed = json.loads(json.dumps(prod)); fixed["week"] = json.loads(json.dumps(Q6_WEEK))
+    c1, o1 = check(fixed)
+    barred = json.loads(json.dumps(fixed)); barred["commentary"]["read"].append("Banks should lock in term funding now.")
+    c2, o2 = check(barred)
+    missed = []
+    for name, mut, words in Q6_SEEDS:
+        t = json.loads(json.dumps(fixed)); mut(t["week"])
+        c, o = check(t)
+        if not (c == 1 and words in o): missed.append(name)
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
+        json.dump(prod["week"], f)
+    cw0, ow0 = run(["brief_tape_check.py", "--week", f.name]); os.unlink(f.name)
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
+        json.dump(Q6_WEEK, f)
+    cw1, ow1 = run(["brief_tape_check.py", "--week", f.name]); os.unlink(f.name)
+    if not (cw0 == 1 and "one event per row" in ow0 and cw1 == 0): missed.append("--week mode (STEP 5c)")
+    ok = c0 == 1 and "one event per row" in o0 and c1 == 0 and c2 == 1 and "barred" in o2 and not missed
+    return ok, (f"13 Oct production tape: {'FAIL as required (Q6)' if c0 == 1 else last(o0)}; same tape, one event per row: {last(o1)}; "
+                f"seeded barred phrase: {'FAIL as required' if c2 == 1 else last(o2)}; Q6 seeds {len(Q6_SEEDS) - len(missed)}/{len(Q6_SEEDS)} FAIL; --week {'FAIL/PASS as required' if cw0 == 1 and cw1 == 0 else 'WRONG'}"
+                + (f" (missed: {', '.join(missed)})" if missed else ""))
 
 
 def layout_case(skip):
