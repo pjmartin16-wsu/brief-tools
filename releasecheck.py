@@ -371,6 +371,9 @@ def visible_text(path):
 INTERNAL_MARKER = re.compile(r"RELEASECHECK\s*:\s*INTERNAL", re.I)
 
 
+LAST_COVERAGE = (0, "")   # (characters of reader-facing text scanned, how) for the file just scanned
+
+
 def scan(path):
     # The marker is checked against the RAW file, not the stripped text. In HTML
     # the natural place to put it is a comment — and visible_text() strips
@@ -398,6 +401,15 @@ def scan(path):
     rendered = text is not None
     if not rendered:
         text = visible_text(path)
+    # Third re-review, 15 Oct 2026: the <title> shows in the browser tab and the print header but was never scanned
+    # ("We guarantee you will earn 12%" passed). It is reader-facing text; it is checked with the body.
+    if path.lower().endswith((".html", ".htm")):
+        tm_ = re.search(r"<title[^>]*>(.*?)</title>", raw, re.I | re.S)
+        if tm_ and tm_.group(1).strip():
+            text = html.unescape(re.sub(r"\s+", " ", tm_.group(1)).strip()) + "\n" + text
+    text = text.replace("\ufeff", "")   # a byte-order mark is not text (a BOM-only file read as 1 character)
+    global LAST_COVERAGE
+    LAST_COVERAGE = (len(text.strip()), "rendered" if rendered else "static strip")
     lines = text.split("\n")
     found = []
     # Coverage. An HTML file whose reader-facing text is a rounding error of its
@@ -652,6 +664,8 @@ def main():
         print(__doc__)
         return 2
     if args[0] == "--self-test":
+        if len(args) > 1:   # second re-review: "--self-test file.md" exited 0 without checking file.md
+            print("INPUT ERROR: --self-test takes no files; run the files without it"); return 2
         return self_test()
 
     rc = self_test()
@@ -659,15 +673,42 @@ def main():
         return rc
     print()
 
-    worst = 0
+    # 15 Oct 2026 (outside review CX-07): a requested file that did not exist printed "skip" and the run still exited 0,
+    # so a typo in a path read as a clean release. A missing file is now an input error: exit 2, never a pass.
+    worst, missing = 0, []
     for path in args:
         if not os.path.exists(path):
-            print(f"skip — {path} not found")
+            print(f"MISSING — {path} not found: nothing was checked for it")
+            missing.append(path)
             continue
+        # Adversarial review of the CX-07 fix (15 Oct 2026): a folder crashed with a traceback, and an empty file or a
+        # binary .docx printed "PASS — no findings" although no text was read. Zero coverage is an input error, never a pass.
+        if os.path.isdir(path):
+            print(f"MISSING — {path} is a folder: name the files to check"); missing.append(path); continue
+        if os.path.splitext(path)[1].lower() not in (".html", ".htm", ".md", ".txt"):
+            print(f"MISSING — {path}: not a text format this checker reads (.html, .htm, .md, .txt); export it first"); missing.append(path); continue
+        rawb = open(path, "rb").read()
+        if not rawb.strip():
+            print(f"MISSING — {path} is empty: nothing to check"); missing.append(path); continue
+        # Second re-review, 15 Oct: zip bytes renamed .txt and a NUL-filled .md passed. Text has no NUL bytes and decodes.
+        try:
+            rawb.decode("utf-8")
+            is_text = b"\x00" not in rawb
+        except UnicodeDecodeError:
+            is_text = False
+        if not is_text:
+            print(f"MISSING — {path} is not UTF-8 text (binary content under a text extension)"); missing.append(path); continue
         findings, downgraded, internal = scan(path)
+        if LAST_COVERAGE[0] == 0:
+            # an HTML file of comments, scripts or markup only: no reader-facing text was read, so nothing was checked
+            print(f"MISSING — {path}: no reader-facing text found ({LAST_COVERAGE[1]}); nothing was checked"); missing.append(path); continue
+        print(f"coverage — {os.path.basename(path)}: {LAST_COVERAGE[0]:,} characters of reader-facing text scanned ({LAST_COVERAGE[1]})")
         report(path, findings, downgraded, internal)
         if findings or internal:
             worst = 1
+    if missing:
+        print(f"INPUT ERROR: {len(missing)} requested file(s) not found, unreadable or empty; this release is NOT checked.")
+        return 2
     if worst:
         print("BLOCK findings must be resolved. WARN findings must be scoped or "
               "justified. CHECK findings mean: open the primary source and read "

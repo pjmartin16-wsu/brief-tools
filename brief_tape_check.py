@@ -5,7 +5,50 @@ files and requires the same verdict. Both read the barred wording from setnova_r
 unknown top-level keys (the Desk ignored them until 13 Oct), and both hold the calendar to one event per row (14 Oct, Q6). Usage: python3 brief_tape_check.py marketclose_desk.json  -> exit 0 = PASS.
        python3 brief_tape_check.py --week rows.json         -> the calendar rows alone, before rendering (STEP 5c);
        exit 0 = WEEK PASS, 1 = WEEK FAIL, 2 = input error."""
-import hashlib, json, os, re, sys
+import datetime, hashlib, json, math, os, re, sys
+
+# 15 Oct 2026 (outside review CX-08): the tape check accepted NaN, a date like "2026-99-99garbage" and a 2-year rate of
+# 99.9% beside a 4.80% 2-year curve point. Numbers must now be finite, dates real calendar dates (optionally followed by
+# a time after "T" or a space), and each Treasury rate must equal its own curve point. src/schema/market.ts holds the same rules.
+ISO_HEAD = re.compile(r"^(\d{4})-(\d{2})-(\d{2})(?:$|[T ])", re.ASCII)
+RATE_TENOR = {"t2": 2, "t5": 5, "t10": 10, "t30": 30}
+RATE_CURVE_TOL = 0.005 + 1e-9   # percentage points (both carried to 2 decimals); the same expression as market.ts
+# Display text has a strict grammar (third re-review, 15 Oct 2026): any two numbers used to read as a range, so
+# "4.80% (99.90% yesterday)" passed beside v 4.8, and an ASCII-hyphen range "3.75-4.00%" was misread as a negative.
+# A disp is exactly one level ("4.80%", "+44 bp", "4.80") or one range ("3.75–4.00%", "3.75-4.00%"); nothing else.
+DISP_ONE = re.compile(r"\s*([+\-\u2212]?\d+(?:\.\d+)?)\s*(%|bp)?\s*")
+DISP_RANGE = re.compile(r"\s*(\d+(?:\.\d+)?)\s*%?\s*[\u2013\u2014-]\s*(\d+(?:\.\d+)?)\s*(%|bp)?\s*")
+
+
+SINGLE_LEVEL = {"t2", "t5", "t10", "t30", "s210", "effr", "sofr"}   # one observed level; only a target (ff) may be a range
+
+
+def disp_levels(disp):
+    """(lo, hi) of a display string, or None when it is not exactly one level or one range."""
+    m = DISP_ONE.fullmatch(disp)
+    if m:
+        x = float(m.group(1).replace("\u2212", "-")); return (x, x)
+    m = DISP_RANGE.fullmatch(disp)
+    if m:
+        a, b = float(m.group(1)), float(m.group(2)); return (min(a, b), max(a, b)) if a != b else None
+    return None
+
+
+def disp_agrees(v, disp, tol):
+    lv = disp_levels(disp)
+    return lv is not None and lv[0] - tol <= v <= lv[1] + tol
+
+
+SPREAD_BP = re.compile(r"^\s*([+\-\u2212]?)(\d+(?:\.\d+)?)\s*bp\s*$")
+
+
+def iso_date_ok(s):
+    m = isinstance(s, str) and ISO_HEAD.match(s)
+    if not m: return False
+    try: datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    except ValueError: return False
+    return True
+
 
 RATE_IDS = {"ff", "effr", "sofr", "t2", "t5", "t10", "s210", "t30", "mtg30", "fhlb3", "cd12", "hysa"}
 CLASSES = {"pol", "ref", "tsy", "mtg", "dep", "whl"}
@@ -83,7 +126,7 @@ def week_errors(week):
 def check(t):
     e = []
     ne = lambda x: isinstance(x, str) and len(x) > 0
-    num = lambda x: isinstance(x, (int, float)) and not isinstance(x, bool)
+    num = lambda x: isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
     if not isinstance(t, dict):
         return ["not a JSON object"]
     m = t.get("meta")
@@ -92,7 +135,7 @@ def check(t):
     else:
         for k in ("label", "built"):
             if not ne(m.get(k)): e.append(f"meta.{k} missing")
-        if not (isinstance(m.get("asof"), str) and re.match(r"^\d{4}-\d{2}-\d{2}", m["asof"])): e.append("meta.asof must start YYYY-MM-DD")
+        if not iso_date_ok(m.get("asof")): e.append("meta.asof must be a real date YYYY-MM-DD (a time may follow after T or a space)")
         if "pass" in m and not isinstance(m["pass"], str): e.append("meta.pass must be text")
         if "sample" in m and not isinstance(m["sample"], bool): e.append("meta.sample must be true/false")
     c = t.get("classes")
@@ -116,6 +159,12 @@ def check(t):
         if "v" in r and not num(r["v"]): e.append(f"rates[{i}].v must be a number")
         if "disp" in r and not isinstance(r["disp"], str): e.append(f"rates[{i}].disp must be text")
         if "v" not in r and "disp" not in r: e.append(f"rates[{i}] needs v or disp")
+        if num(r.get("v")) and isinstance(r.get("disp"), str) and not disp_agrees(r["v"], r["disp"], 1 + 1e-9 if r.get("id") == "s210" else RATE_CURVE_TOL):
+            e.append(f"rates[{i}] {r.get('id')}: disp {r['disp']!r} does not say v {r['v']}: one level, two values")
+        if isinstance(r.get("disp"), str) and disp_levels(r["disp"]) is None:
+            e.append(f"rates[{i}] {r.get('id')}: disp {r['disp']!r} is not one level or one range")
+        elif isinstance(r.get("disp"), str) and r.get("id") in SINGLE_LEVEL and disp_levels(r["disp"])[0] != disp_levels(r["disp"])[1]:
+            e.append(f"rates[{i}] {r.get('id')}: disp {r['disp']!r} is a range; a {r.get('id')} level is one number: one level, two values")
     for need in NEEDED:
         r = next((x for x in rates if isinstance(x, dict) and x.get("id") == need), None)
         if not r or not num(r.get("v")): e.append(f"rate {need}: no numeric level")
@@ -126,6 +175,15 @@ def check(t):
         if any(cv[i][0] <= cv[i - 1][0] for i in range(1, len(cv))): e.append("curve tenors must ascend")
         for ten in (2, 10):
             if not any(p[0] == ten for p in cv): e.append(f"curve: no {ten}-year point")
+        for r in rates:
+            if isinstance(r, dict) and r.get("id") in RATE_TENOR and not num(r.get("v")) and isinstance(r.get("disp"), str):
+                lv = disp_levels(r["disp"]); pt = next((p for p in cv if p[0] == RATE_TENOR[r["id"]]), None)
+                if pt is not None and (lv is None or lv[0] != lv[1] or abs(pt[1] - lv[0]) > RATE_CURVE_TOL):
+                    e.append(f"rate {r['id']} disp {r['disp']!r} differs from the {RATE_TENOR[r['id']]}-year curve point {pt[1]}: one level, two values")
+            if isinstance(r, dict) and r.get("id") in RATE_TENOR and num(r.get("v")):
+                pt = next((p for p in cv if p[0] == RATE_TENOR[r["id"]]), None)
+                if pt is not None and abs(pt[1] - r["v"]) > RATE_CURVE_TOL:
+                    e.append(f"rate {r['id']} {r['v']} differs from the {RATE_TENOR[r['id']]}-year curve point {pt[1]}: one level, two values")
     for k, need in (("week", ("d", "it")), ("news", ("d", "t")), ("reg", ("d", "ag", "t"))):
         v = t.get(k, [])
         if not isinstance(v, list): e.append(f"{k} must be a list"); continue
@@ -147,6 +205,26 @@ def check(t):
                 for pat in barred_patterns():
                     if re.search(pat, text, re.I): e.append(f"commentary: retired or barred wording /{pat}/")
                 if re.search(r"<[a-z/][^>]*>", text, re.I): e.append("commentary: carries markup; the tape holds plain text")
+    # Adversarial review of 15 Oct: rate paths were never checked (NaN paths passed), and the 2s10s spread could disagree
+    # with its own 2- and 10-year rates ("+999 bp" against 44 bp). market.ts holds the same two rules.
+    pa = t.get("paths", "absent")
+    if pa != "absent":
+        if not isinstance(pa, dict) or set(pa) - {"priced"}:
+            e.append("paths may hold only priced")
+        elif "priced" in pa:
+            pr = pa["priced"]
+            if not (isinstance(pr, dict) and ne(pr.get("src")) and all(isinstance(pr.get(k), list) and len(pr[k]) == 4 and all(num(x) for x in pr[k]) for k in ("short", "long"))):
+                e.append("paths.priced needs src and short/long of exactly 4 finite numbers")
+    rv = {r.get("id"): r.get("v") for r in rates if isinstance(r, dict)}
+    sp = next((r for r in rates if isinstance(r, dict) and r.get("id") == "s210"), None)
+    if sp is not None and num(rv.get("t2")) and num(rv.get("t10")):
+        want = (rv["t10"] - rv["t2"]) * 100
+        got = sp.get("v") if num(sp.get("v")) else None
+        if got is None and isinstance(sp.get("disp"), str):
+            m2 = SPREAD_BP.match(sp["disp"])
+            if m2: got = float(m2.group(2)) * (-1 if m2.group(1) in ("-", "\u2212") else 1)
+        if got is None: e.append("rate s210 needs a numeric v or a disp like '+44 bp'")
+        elif abs(got - want) > 1 + 1e-9: e.append(f"rate s210 {got:+g} bp differs from 10-year less 2-year ({want:+.0f} bp): one spread, two values")
     extra = set(t) - {"meta", "classes", "rates", "curve", "week", "news", "reg", "paths", "commentary"}
     if extra: e.append("unknown top-level keys: " + ", ".join(sorted(extra)))
     return e
@@ -180,6 +258,8 @@ if __name__ == "__main__":
         errs = check(tape)
     except (OSError, ValueError) as x:
         print(f"TAPE FAIL: rules file: {x}"); sys.exit(1)
+    except Exception as x:   # e.g. a 400-digit integer overflowing float arithmetic: a failure, never a traceback
+        print(f"TAPE FAIL: could not check: {type(x).__name__}: {x}"); sys.exit(1)
     if errs:
         print("TAPE FAIL:\n  " + "\n  ".join(errs)); sys.exit(1)
     print("TAPE PASS"); sys.exit(0)

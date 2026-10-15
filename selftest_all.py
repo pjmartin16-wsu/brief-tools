@@ -65,6 +65,53 @@ Q6_SEEDS = [
 ]
 
 
+# 15 Oct 2026 (outside review CX-08): each must FAIL. json.dump writes NaN and Infinity as bare tokens, which
+# Python's json.load reads back as floats, so these reach the check exactly as a hand-edited tape would.
+TAPE_SEEDS = [
+    ("NaN as a rate level", lambda t: next(r for r in t["rates"] if r["id"] == "effr").__setitem__("v", float("nan")), "must be a number"),
+    ("Infinity on the curve", lambda t: t["curve"][0].__setitem__(1, float("inf")), "curve must be"),
+    ("an impossible as-of date", lambda t: t["meta"].__setitem__("asof", "2026-99-99garbage"), "meta.asof"),
+    ("a real date with junk after it", lambda t: t["meta"].__setitem__("asof", "2026-10-09garbage"), "meta.asof"),
+    ("February 30", lambda t: t["meta"].__setitem__("asof", "2026-02-30"), "meta.asof"),
+    ("2-year rate 99.9 beside a 4.80 curve point", lambda t: next(r for r in t["rates"] if r["id"] == "t2").__setitem__("v", 99.9), "one level, two values"),
+    # adversarial review of the fixes, 15 Oct 2026
+    ("NaN in a priced rate path", lambda t: t.__setitem__("paths", {"priced": {"src": "x", "short": [float("nan")] * 4, "long": [1, 2, 3, 4]}}), "paths.priced"),
+    ("a rate path of 3 points", lambda t: t.__setitem__("paths", {"priced": {"src": "x", "short": [1, 2, 3], "long": [1, 2, 3, 4]}}), "paths.priced"),
+    ("2s10s '+999 bp' against 44 bp", lambda t: next(r for r in t["rates"] if r["id"] == "s210").__setitem__("disp", "+999 bp"), "one spread, two values"),
+    ("10-year 5.2451 against a 5.24 curve point (just past the shared tolerance)", lambda t: next(r for r in t["rates"] if r["id"] == "t10").__setitem__("v", 5.2451), "one level, two values"),
+    ("t2 disp '99.90%' beside v 4.8 (second re-review)", lambda t: next(r for r in t["rates"] if r["id"] == "t2").__setitem__("disp", "99.90%"), "one level, two values"),
+    ("s210 v 44 with disp '+999 bp'", lambda t: next(r for r in t["rates"] if r["id"] == "s210").update({"v": 44, "disp": "+999 bp"}), "one level, two values"),
+    ("t2 disp '4.80% (99.90% yesterday)' (third re-review)", lambda t: next(r for r in t["rates"] if r["id"] == "t2").__setitem__("disp", "4.80% (99.90% yesterday)"), "not one level or one range"),
+    ("t2 disp '1.00–99.90%' around v", lambda t: next(r for r in t["rates"] if r["id"] == "t2").__setitem__("disp", "1.00\u201399.90%"), "one level, two values"),
+    ("t30 as disp only, 99.90%, beside a 5.60 curve point", lambda t: next(r for r in t["rates"] if r["id"] == "t30").update({"disp": "99.90%"}) or next(r for r in t["rates"] if r["id"] == "t30").pop("v"), "one level, two values"),
+    ("paths: null", lambda t: t.__setitem__("paths", None), "paths may hold only priced"),
+    ("a 400-digit integer", lambda t: next(r for r in t["rates"] if r["id"] == "effr").__setitem__("v", 10 ** 400), "TAPE FAIL"),
+]
+
+
+def releasecheck_missing_case():
+    """15 Oct 2026 (outside review CX-07, and the adversarial review of its fix): a requested file that does not exist,
+    a folder, an empty file and a binary format must each exit 2 (INPUT ERROR), never 0."""
+    d = tempfile.mkdtemp()
+    empty = os.path.join(d, "empty.md"); open(empty, "w").close()
+    docx = os.path.join(d, "x.docx"); open(docx, "wb").write(b"PK\x03\x04 not text")
+    wrong = []
+    comment = os.path.join(d, "comment.html"); open(comment, "w").write("<!-- nothing a reader sees -->")
+    ziptxt = os.path.join(d, "x.txt"); open(ziptxt, "wb").write(b"PK\x03\x04\x14\x00\x00\x00\x08\x00\xff\xfe")
+    nul = os.path.join(d, "bin.md"); open(nul, "wb").write(b"\x00" * 64)
+    bom = os.path.join(d, "bom.md"); open(bom, "wb").write(b"\xef\xbb\xbf")
+    cases = (("missing file", [os.path.join("test", "no-such-release-file.md")]), ("folder", [d]), ("empty file", [empty]), (".docx", [docx]),
+             ("comment-only HTML", [comment]), ("zip bytes as .txt", [ziptxt]), ("NUL-filled .md", [nul]), ("byte-order mark only", [bom]),
+             ("--self-test with a file", ["--self-test", empty]))
+    for label, args in cases:
+        c, o = run(["releasecheck.py", *args])
+        if label.startswith("--self-test"):
+            if c != 2: wrong.append(f"{label} exit {c}")
+            continue
+        if not (c == 2 and "MISSING" in o): wrong.append(f"{label} exit {c}")
+    return not wrong, f"{len(cases)} zero-coverage inputs (missing, folder, empty, binary, comment-only, self-test misuse): " + ("all exit 2 as required" if not wrong else "WRONG: " + "; ".join(wrong))
+
+
 def tape_case():
     good = os.path.join(HERE, "test", "marketclose_desk_2026-10-13_production.json")
     prod = json.load(open(good, encoding="utf-8"))
@@ -77,6 +124,8 @@ def tape_case():
         return c, o
 
     c0, o0 = check(prod)
+    hy = json.loads(json.dumps(prod)); hy["week"] = json.loads(json.dumps(Q6_WEEK)); next(r for r in hy["rates"] if r["id"] == "ff")["disp"] = "3.75-4.00%"
+    ch, oh = check(hy)
     fixed = json.loads(json.dumps(prod)); fixed["week"] = json.loads(json.dumps(Q6_WEEK))
     c1, o1 = check(fixed)
     barred = json.loads(json.dumps(fixed)); barred["commentary"]["read"].append("Banks should lock in term funding now.")
@@ -93,9 +142,17 @@ def tape_case():
         json.dump(Q6_WEEK, f)
     cw1, ow1 = run(["brief_tape_check.py", "--week", f.name]); os.unlink(f.name)
     if not (cw0 == 1 and "one event per row" in ow0 and cw1 == 0): missed.append("--week mode (STEP 5c)")
+    tmissed = []
+    for name, mut, words in TAPE_SEEDS:
+        t = json.loads(json.dumps(fixed)); mut(t)
+        c, o = check(t)
+        if not (c == 1 and words in o): tmissed.append(name)
+    q6missed = list(missed)
+    missed += tmissed
+    if ch != 0: missed.append("ff target range with an ASCII hyphen 3.75-4.00% must PASS")
     ok = c0 == 1 and "one event per row" in o0 and c1 == 0 and c2 == 1 and "barred" in o2 and not missed
     return ok, (f"13 Oct production tape: {'FAIL as required (Q6)' if c0 == 1 else last(o0)}; same tape, one event per row: {last(o1)}; "
-                f"seeded barred phrase: {'FAIL as required' if c2 == 1 else last(o2)}; Q6 seeds {len(Q6_SEEDS) - len(missed)}/{len(Q6_SEEDS)} FAIL; --week {'FAIL/PASS as required' if cw0 == 1 and cw1 == 0 else 'WRONG'}"
+                f"seeded barred phrase: {'FAIL as required' if c2 == 1 else last(o2)}; CX-08 seeds {len(TAPE_SEEDS) - len(tmissed)}/{len(TAPE_SEEDS)} FAIL; Q6 seeds {len(Q6_SEEDS) - len([m for m in q6missed if m != "--week mode (STEP 5c)"])}/{len(Q6_SEEDS)} FAIL; --week {'FAIL/PASS as required' if cw0 == 1 and cw1 == 0 else 'WRONG'}"
                 + (f" (missed: {', '.join(missed)})" if missed else ""))
 
 
@@ -119,6 +176,7 @@ def main():
         c, o = run(args)
         ok = c == 0 and last(o).startswith(want)
         results.append((name, ok, last(o)[:160]))
+    results.append(("releasecheck_missing",) + releasecheck_missing_case())
     results.append(("brief_tape_check",) + tape_case())
     results.append(("layoutaudit",) + layout_case(skip))
     bad = 0
@@ -126,7 +184,12 @@ def main():
         tag = "PASS  " if ok else ("NOT RUN" if ok is None else "BROKEN")
         bad += ok is False
         print(f"{tag} {name:17} {msg}")
-    print(f"ALL SELF-TESTS {'PASS' if not bad else 'FAIL'} ({len(results) - bad}/{len(results)})")
+    # 15 Oct 2026 (outside review, lower priority): a NOT RUN check is named on the summary line, so a skipped layout
+    # run can never read as a full pass. The line still begins "ALL SELF-TESTS PASS" when nothing failed.
+    notrun = [n for n, ok, _ in results if ok is None]
+    ran = len(results) - len(notrun)
+    print(f"ALL SELF-TESTS {'PASS' if not bad else 'FAIL'} ({ran - bad}/{ran} ran"
+          + (f"; NOT RUN: {', '.join(notrun)}" if notrun else "") + ")")
     return 1 if bad else 0
 
 
