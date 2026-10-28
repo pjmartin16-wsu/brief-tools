@@ -721,6 +721,38 @@ def chk_auction_reopening(ed, mc, today):
     return out
 
 
+APOS = "['\u2019]"
+BKR_SUPER = [
+    r"\btop\s+APY\b",
+    r"(?<!stated )\btop of Bankrate" + APOS + r"s\b",
+    r"(?<!stated )\btop\b[^.%\n]{0,60}?\bon Bankrate" + APOS + r"s\b",
+    r"Bankrate" + APOS + r"s\s+(?:best[- ]rate\s+)?lists?\b[^.%\n]{0,30}?\b(?:top|highest|best)\b",
+    r"(?<!stated )\b(?:top|highest|best|leading)\s+(?:(?:\d+|one|six|twelve)[- ](?:month|year)\s+CD|CD|high-yield savings|savings|money[- ]market)\b",
+]
+BKR_UNNAMED = [
+    r"first in Bankrate" + APOS + r"s ranked list(?!\s*\([^)]+\))",
+    r"Bankrate" + APOS + r"s stated top rate(?!\s*\([^)]+\))",
+]
+
+
+def chk_headline_vs_list(ed, mc, today):
+    """bkr (22 Oct 2026, HEADLINE VS LIST): a deposit rate from Bankrate is printed with exactly one of two labels,
+    each naming the institution: "first in Bankrate's ranked list (Peak Bank)" or "Bankrate's stated top rate
+    (Openbank)". Any other superlative ("Top APY", "top of Bankrate's list", "the top high-yield savings APY") FAILs.
+    21 and 22 Oct: Bankrate's page said "Today's top savings rate is 4.35% APY offered by Openbank" while its ranked
+    list began at 4.27% (Peak Bank); "Top of Bankrate's list" failed the Number Verifier with either figure, and both
+    runs were HELD."""
+    out = []
+    for k, t in ed.vis.items():
+        for pat in BKR_SUPER:
+            for m in re.finditer(pat, t, re.I):
+                out.append(f"[{k}] superlative on a Bankrate figure (use \"first in Bankrate's ranked list (Institution)\" or \"Bankrate's stated top rate (Institution)\"): {ctx(t, m.start(), m.end(), 40)}")
+        for pat in BKR_UNNAMED:
+            for m in re.finditer(pat, t, re.I):
+                out.append(f"[{k}] Bankrate label without the institution in brackets: {ctx(t, m.start(), m.end(), 40)}")
+    return out
+
+
 CHECKS = [
     ("5b5", "email hygiene and contrast", chk_email_hygiene),
     ("5b6", "provenance leak", chk_provenance),
@@ -743,6 +775,7 @@ CHECKS = [
     ("src", "Sources line names every source used", chk_sources),
     ("dateline", "no single market as-of over mixed dates", chk_dateline),
     ("auct", "an auction is a reopening only if the schedule says so", chk_auction_reopening),
+    ("bkr", "headline vs list: Bankrate rates name which figure they are", chk_headline_vs_list),
 ]
 
 
@@ -846,7 +879,7 @@ CMN = ("<p>Friday, October 9, 2026 \u00b7 Treasury curve as of Oct 8 close \u00b
        "<p>The 30-day average SOFR (Oct 8) was 3.79%.</p>"
        "<p>The long end rallied on the day (the 10-year 6 bp below October 7, the 30-year 7 bp lower at 5.60%) and the curve was little changed on the week. "
        "Freddie Mac's survey put the 30-year fixed at 7.40% and the 15-year at 6.73%, both up from the prior week (7.28% / 6.60%).</p>"
-       "<p>The 30-year fell 7 bp from October 7. The 2s10s slope steepened 15 bp to +41 bp since September 30. The top 1-year CD APY on Bankrate's list was 4.45%. "
+       "<p>The 30-year fell 7 bp from October 7. The 2s10s slope steepened 15 bp to +41 bp since September 30. The 1-year CD APY first in Bankrate's ranked list (Example Bank) was 4.45%. "
        "The FDIC increased its staffing for bank examinations. WED 14: Personal Income &amp; Outlays, August 2026 \u00b7 8:30 ET.</p>"
        "<p>Ahead: 20-year bond reopening auction Wed Oct 21; 5-year TIPS auction Thu Oct 22.</p>")
 FULL_BODY = ("<p>NIM 3.32% (7 consecutive quarterly increases) \u00b7 Cost of deposits 1.92% (beta 34% vs 45% modeled) \u00b7 AOCI \u2212$41.4M (up $4.6M over three months, less negative) \u00b7 "
@@ -920,6 +953,13 @@ SEEDS = [
     ("auct", "generic", "text", "5-year TIPS auction", "5-year TIPS reopening auction", "14 Oct Number Verifier HOLD: original-issue TIPS called a reopening (Q7)"),
     ("auct", "full", "email_html", "5-year TIPS auction Thu Oct 22.", "5-year TIPS auction Thu Oct 22; the 10-year reopening follows.", "reopening with no schedule record for that security"),
     ("G8", "generic", "email_html", "SOFR 3.88% \u00b7 IORB", "SOFR 3.91% \u00b7 IORB", "SOFR printed off the object (still caught after the Q8 tightening)"),
+    # 22 Oct 2026: HEADLINE VS LIST (Number Verifier HOLD on 21 and 22 Oct, high-yield savings row).
+    ("bkr", "generic", "email_html", "The 1-year CD APY first in Bankrate's ranked list (Example Bank) was 4.45%.", "High-yield savings: 4.27% (Top of Bankrate's list for high-yield savings).", "22 Oct NV HOLD: 'Top of Bankrate's list' on a figure the page's own headline contradicts"),
+    ("bkr", "full", "text", "The 1-year CD APY first in Bankrate's ranked list (Example Bank) was 4.45%.", "On Bankrate's best-rate lists the top 12-month CD APY is 4.60%.", "22 Oct NV HOLD: Funding & Deposit Market sentence calls a list figure 'the top'"),
+    ("bkr", "generic", "file_html", "The 1-year CD APY first in Bankrate's ranked list (Example Bank) was 4.45%.", "The top high-yield savings APY on Bankrate was 4.35%.", "21 Oct NV HOLD: 'top' with no statement of which Bankrate figure"),
+    ("bkr", "full", "email_html", "The 1-year CD APY first in Bankrate's ranked list (Example Bank) was 4.45%.", "Product \u00b7 Top APY \u00b7 Institution. 1-year CD 4.45%.", "the 'Top APY' column header (prompt wording until 22 Oct)"),
+    ("bkr", "generic", "text", "(Example Bank) was", "was", "label used without naming the institution"),
+    ("bkr", "full", "file_html", "first in Bankrate's ranked list (Example Bank)", "Bankrate's stated top rate", "stated-top label without the institution"),
 ]
 
 # (why, mutation of a deep copy of MC_FIX) for the object-level G2b check
@@ -1005,6 +1045,18 @@ def self_test():
         print(report(bad, [])[0])
     else:
         print("  regression 8 Oct ladder without % and 30-day SOFR average: no false positives")
+    # Regression (22 Oct 2026, bkr): both permitted Bankrate labels, in a table row and a sentence, pass.
+    okb = CMN.replace("The 1-year CD APY first in Bankrate's ranked list (Example Bank) was 4.45%. ",
+                      "High-yield savings: 4.35%, Bankrate\u2019s stated top rate (Openbank). On Bankrate's pages the money market APY "
+                      "first in Bankrate's ranked list (Example MM Bank) is 4.05% and the 1-year CD APY first in Bankrate's ranked list (Example Bank) 4.45%. ")
+    bk = [r for r in run([Ed("generic", email_html=_email(okb, "DESK READ"), text=_text(okb))], mc, "2026-10-09")
+          if r["check"] == "bkr" and r["status"] == "FAIL"]
+    if bk:
+        ok = False
+        print("REGRESSION 22 Oct permitted Bankrate labels FAILED:")
+        print(report(bk, [])[0])
+    else:
+        print("  regression 22 Oct permitted Bankrate labels (stated top rate / first in ranked list): no false positive")
     print("SELF-TEST", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 
