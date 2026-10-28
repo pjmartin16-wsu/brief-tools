@@ -26,7 +26,7 @@ import argparse, datetime as dt, json, re, sys
 TRIGGERS = [r"PM's call", r"\bneeds PM\b", r"\bOwed by PM\b", r"\bfor PM to decide\b", r"\bPM decides\b",
             r"\bopen for PM\b", r"\bwaiting on PM\b"]
 TRIG_RE = re.compile("|".join(TRIGGERS), re.I)
-ROW_RE = re.compile(r"^\|\s*([DA]\d+)\s*\|\s*([^|]*)\|\s*([^|]*)\|")
+ROW_RE = re.compile(r"^\|\s*([DA]\d+|D-[A-Za-z0-9-]+)\s*\|\s*([^|]*)\|\s*([^|]*)\|")  # D-ideas-YYYY-MM-DD rows too (26 Oct audit item 5)
 ENTRY_RE = re.compile(r"^## \**(20\d\d-\d\d-\d\d)")
 
 
@@ -89,6 +89,7 @@ FIX_DEC = """# Setnova decisions register
 |---|---|---|---|---|
 | D2 | 10 Oct | Switch the production brief to the slim prompt? | Production change | After 13 Oct |
 | D9 | 12 Oct | Test row with a pipe-free question | Money | |
+| D-ideas-2026-10-26 | Oct 26 | Weekly ideas I-004 to I-006: adopt, park or kill each | Direction | Proposed by the weekly ideas task |
 
 ## ANSWERED (never re-ask)
 
@@ -120,7 +121,7 @@ def self_test():
         nonlocal ok
         print(("  pass  " if cond else "  FAIL  ") + what)
         ok &= bool(cond)
-    chk([x["id"] for x in r["open"]] == ["D2", "D9"], "OPEN rows read: D2, D9 (and no D-row from the ANSWERED section)")
+    chk([x["id"] for x in r["open"]] == ["D2", "D9", "D-ideas-2026-10-26"], "OPEN rows read: D2, D9, D-ideas-2026-10-26 (a non-numeric id; missed until 28 Oct) and no D-row from the ANSWERED section")
     chk([x["id"] for x in r["answered"]] == ["A1", "A20"], "ANSWERED rows read: A1, A20")
     lines = [c["line"] for c in r["candidates"]]
     chk(any("white-on-cyan" in l for l in lines), "seed NEW candidate found ('Still open for PM' line)")
