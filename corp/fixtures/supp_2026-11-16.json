@@ -3,7 +3,6 @@
  "curve_prior":{"1M":4.02,"3M":4.19,"6M":4.23,"1Y":4.33,"2Y":4.51,"5Y":4.64,"10Y":4.86,"30Y":5.26},
  "sofr30":{"date":"2026-11-13","v":3.91665,"prior":3.91294},
  "prime":{"date":"2026-11-13","v":7.00},
- "cp_nf_1m":{"date":"2026-11-13","v":3.99},
  "ecb":{"2026-11-13":{"USD":1.1052,"JPY":176.83,"GBP":0.83559,"CAD":1.5758,"MXN":20.5491,"CNY":7.3738},
         "2026-11-06":{"USD":1.1165,"JPY":176.77,"GBP":0.83415,"CAD":1.5705,"MXN":20.8828,"CNY":7.4485}},
  "week_keep":["FOMC minutes","bill auction","industrial production","import and export prices","20-year bond","state employment"],
@@ -15,7 +14,7 @@
   "For a company, the week split two ways. SOFR, where most floating-rate credit lines reset, was almost unchanged, while the Treasury yields that fixed-rate loans and bonds are priced from rose by about a third of a point. Short-term cash earns a little more than a week ago. The minutes of the October FOMC meeting are due Wednesday at 2:00 p.m. ET."],
  "cash":[
   ["Floating-rate debt.","Each 0.25 point on $10 million of SOFR- or prime-based borrowing is $25,000 a year in interest, before any floor or hedge. The SOFR 30-day average was 3.92% on Friday, within a basis point of a week earlier."],
-  ["Operating cash.","Every 1 point of yield on $5 million of idle cash is $50,000 a year. Compare your account&rsquo;s rate, after fees and earnings credits, with the 4.10% one-month bill and 3.99% one-month commercial paper."],
+  ["Operating cash.","Every 1 point of yield on $5 million of idle cash is $50,000 a year. Compare your account&rsquo;s rate, after fees and earnings credits, with the 4.10% one-month bill."],
   ["Thanksgiving.","Thursday, November 26 is a Federal Reserve holiday. Check payroll, vendor runs and debt payments dated around it against your bank&rsquo;s holiday cutoffs."]],
  "cta":["Cash forecasting: a 13-week cash forecast model, ","built with the client&rsquo;s team."],
  "banner":"Corporate edition · for PM review only · not distributed"}

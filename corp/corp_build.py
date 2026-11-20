@@ -4,6 +4,7 @@ RT={r['id']:r for r in tape['rates']}
 TEN={0.25:'3M',0.5:'6M',1:'1Y',2:'2Y',5:'5Y',10:'10Y',30:'30Y'}
 n={TEN[t]:v for t,v in tape['curve'] if t in TEN}; n['1M']=S['curve_1m'][S['close']]; w=S['curve_prior']
 assert tape['meta']['asof']==S['close'], 'tape close and supplement close differ'
+assert 'cp_nf_1m' not in S, 'commercial paper is not carried (A133): remove cp_nf_1m from the supplement'
 def md(iso): d=dt.date.fromisoformat(iso); return d.strftime('%b ')+str(d.day)
 def note_date(r): return r['note'].replace(' print','').replace(' close','')
 NAVY='#0A2A5E';CY='#35B2C2';CYF='#1D96A6';CYS='#E3F4F7';AMB='#C07A34';GR='#2E7D4F';RD='#B4432A';INK='#1c2531';INK2='#3d4a5c';MU='#5f6b7a';LN='#e2e7ee'
@@ -15,7 +16,7 @@ def card(lbl,val,sub):
     return f'<td style="width:20%;padding:12px 10px;border:1px solid {LN};vertical-align:top"><div style="font:600 11px {SANS};letter-spacing:.06em;text-transform:uppercase;color:{MU}">{lbl}</div><div style="font:600 22px {SANS};color:{NAVY};margin-top:6px">{val}</div><div style="font:12px/1.4 {SANS};color:{MU};margin-top:4px">{sub}</div></td>'
 ff=RT['ff']['disp']; sofr=RT['sofr']['v']; effr=RT['effr']['v']
 rates1=[card('Fed funds target',ff,'Held 28 Oct'),card('SOFR',f"{sofr:.2f}%",note_date(RT['sofr'])),card('SOFR 30-day avg',f"{S['sofr30']['v']:.2f}%",md(S['sofr30']['date'])),card('Prime rate',f"{S['prime']['v']:.2f}%",md(S['prime']['date'])),card('Fed funds effective',f"{effr:.2f}%",note_date(RT['effr']))]
-rates2=[card('1-month bill',f"{n['1M']:.2f}%",f"{md(S['close'])} · {bp(n['1M'],w['1M'])} on the week"),card('3-month bill',f"{n['3M']:.2f}%",f"{md(S['close'])} · {bp(n['3M'],w['3M'])}"),card('6-month bill',f"{n['6M']:.2f}%",f"{md(S['close'])} · {bp(n['6M'],w['6M'])}"),card('1-year bill',f"{n['1Y']:.2f}%",f"{md(S['close'])} · {bp(n['1Y'],w['1Y'])}"),card('CP, 1-month',f"{S['cp_nf_1m']['v']:.2f}%",f"Nonfinancial AA · {md(S['cp_nf_1m']['date'])}")]
+rates2=[card('1-month bill',f"{n['1M']:.2f}%",f"{md(S['close'])} · {bp(n['1M'],w['1M'])} on the week"),card('3-month bill',f"{n['3M']:.2f}%",f"{md(S['close'])} · {bp(n['3M'],w['3M'])}"),card('6-month bill',f"{n['6M']:.2f}%",f"{md(S['close'])} · {bp(n['6M'],w['6M'])}"),card('1-year bill',f"{n['1Y']:.2f}%",f"{md(S['close'])} · {bp(n['1Y'],w['1Y'])}"),card('2-year note',f"{n['2Y']:.2f}%",f"{md(S['close'])} · {bp(n['2Y'],w['2Y'])}")]
 # curve svg
 T=['1M','3M','6M','1Y','2Y','5Y','10Y','30Y']; W,H=520,200; L,R,TP,B=40,12,14,30
 lo=min(min(n.values()),min(w.values()))-0.1; hi=max(max(n.values()),max(w.values()))+0.1
@@ -65,7 +66,7 @@ html=f'''<!DOCTYPE html>
 {reads}
 {h2('Cash and borrowing rates','Percent')}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>{''.join(rates1)}</tr><tr>{''.join(rates2)}</tr></table>
-<div style="font:12px/1.5 {SANS};color:{MU};margin-top:8px">SOFR and the effective funds rate are for {note_date(RT['sofr'])}, published the next business morning; the SOFR 30-day average, prime and commercial paper carry their own dates. Bill yields are Treasury par yields (bond-equivalent basis) at Friday&rsquo;s close.</div>
+<div style="font:12px/1.5 {SANS};color:{MU};margin-top:8px">SOFR and the effective funds rate are for {note_date(RT['sofr'])}, published the next business morning; the SOFR 30-day average and prime carry their own dates. Bill and note yields are Treasury par yields (bond-equivalent basis) at Friday&rsquo;s close.</div>
 {h2('Treasury curve',md(S['close'])+' close · dashed: '+md(S['prior']))}
 {svg}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-top:6px"><tr>{ladder}</tr></table>
